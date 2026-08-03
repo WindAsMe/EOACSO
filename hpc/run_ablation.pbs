@@ -2,13 +2,16 @@
 #PBS -N eoacso-ablation
 #PBS -q sc
 #PBS -l select=1:nsockets=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=6:00:00
 #PBS -W group_list=c30636
 #PBS -j oe
 
 # 5 EOACSO ablation variants, n_runs=20, both datasets. Same one-socket-job
 # shape as run_comparison.pbs -- see that script's comments for why, and for
-# the nsockets= (not ncpus=/mem=) resource-syntax note.
+# the nsockets= (not ncpus=/mem=) resource-syntax note and the deliberately
+# modest 6h walltime (this cluster's token pre-check rejects jobs whose
+# FULL requested walltime would exceed the token budget -- see
+# gakusai_Users_Guide_ja_1.1.pdf 1.6.1 -- run `show_token` to check).
 
 set -euo pipefail
 NCPUS=32

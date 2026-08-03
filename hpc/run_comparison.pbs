@@ -2,7 +2,7 @@
 #PBS -N eoacso-comparison
 #PBS -q sc
 #PBS -l select=1:nsockets=1
-#PBS -l walltime=24:00:00
+#PBS -l walltime=6:00:00
 #PBS -W group_list=c30636
 #PBS -j oe
 
@@ -17,6 +17,16 @@
 # `qstat -Qf sc`/`qstat -Qf lc`). NCPUS below MUST match that core count
 # (each worker is pinned to 1 BLAS thread; see _limit_threads_per_worker in
 # run_fs_experiment.py).
+#
+# walltime is deliberately modest (6h, not 24h): this cluster's prepaid
+# queues (see gakusai_Users_Guide_ja_1.1.pdf 1.6.1) pre-check token budget
+# assuming the job runs for its FULL requested walltime, and reject
+# submission outright ("Token limit exceeded") if that worst case would
+# push usage over 100% -- even though this job realistically finishes in
+# a few hours. Run `show_token` to check actual balance; raise walltime
+# back up only if 6h genuinely isn't enough (the job can just be
+# `qsub`'d again with --resume either way, so under-requesting costs
+# only a resubmission, not lost work).
 
 set -euo pipefail
 NCPUS=32
