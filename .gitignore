@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE / tooling
+.idea/
+.claude/
+
+# Generated experiment output (regenerable via src/experiments/*.py)
+results/tables/*.csv
+results/tables/_stale_old_encoding/
+results/figures/*.png
+!results/figures/.gitkeep
+!results/tables/.gitkeep
+
+# Ad-hoc run logs
+*.log
+logs_*.txt
+logs/
