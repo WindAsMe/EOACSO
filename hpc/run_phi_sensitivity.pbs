@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N cso-phi-sensitivity
+#PBS -q sc
+#PBS -l select=1:nsockets=1
+#PBS -l walltime=6:00:00
+#PBS -W group_list=c30636
+#PBS -j oe
+
+# CSO_searched_tf only, phi in {0.0, 0.05, ..., 0.50} (11 values), n_runs=20,
+# both datasets -- 440 runs total. Scoped to the proposed method: phi (CSO's
+# social-term coefficient, Cheng & Jin 2015 Eq. 25-26) doesn't exist in any
+# of the 7 reproduced baselines. Every (phi, dataset, run) triple is
+# independent -- run_phi_values() already parallelizes them across a
+# ProcessPoolExecutor internally, so one 1-socket job is the right shape, no
+# job array needed. Resource syntax/walltime rationale matches
+# run_comparison.pbs (see that file's header comment) -- CSO_searched_tf is
+# also this project's cheapest-per-generation algorithm (pop_size/2 evals per
+# generation, see run_fs_experiment.py's _EVALS_PER_GENERATION), so 440 runs
+# of it should not exceed the main comparison job's (320 mixed-algorithm
+# runs) actual walltime by much, despite the larger run count.
+
+set -euo pipefail
+NCPUS=32
+
+cd "$PBS_O_WORKDIR"
+mkdir -p logs results/tables
+
+source "$HOME/miniconda3/bin/activate" eoacso
+
+python -m src.experiments.run_phi_sensitivity \
+    --dataset oxford naranjo \
+    --n_runs 20 \
+    --pop_size 30 \
+    --max_evaluations 3000 \
+    --base_seed 2026 \
+    --cv_folds 5 \
+    --n_workers "$NCPUS" \
+    --resume

@@ -88,6 +88,14 @@ actual runtime is well under 6h (160 runs, parallelized 32-way), but if
 the job hits the walltime limit before finishing, just `qsub` it again --
 see the `--resume` note below.
 
+For the proposed method's phi (CSO social-term coefficient) sensitivity
+sweep -- 11 fixed phi values x 20 runs x 2 datasets = 440 runs, scoped to
+`CSO_searched_tf` only since phi doesn't apply to any baseline -- submit
+separately:
+```bash
+qsub hpc/run_phi_sensitivity.pbs
+```
+
 **Why 6h, not something larger "to be safe":** this cluster's prepaid
 queues (`ec`/`sc`/`lc`) pre-check token budget assuming the job runs for
 its *entire requested* walltime, and reject submission outright ("Token

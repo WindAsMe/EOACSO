@@ -359,32 +359,41 @@ Every candidate solution is scored by a single scalar fitness, combining diagnos
 \end{equation}
 where $\text{BalAcc}$ is the out-of-fold balanced accuracy (the average of sensitivity and specificity, robust to Oxford's class imbalance \cite{Brodersen:2010}) achieved by the decoded feature subset and ensemble of classifiers, $|S|$ is the number of selected features, $D$ is the total number of available features, and $\omega = 0.9$ weights diagnostic performance nine times as heavily as feature count. This weighted-sum formulation -- a classification-performance term and a feature-cardinality-ratio term combined via a single dominant weight -- follows the same convention used to combine a $k$NN-classifier error rate with a selected-feature ratio in a 2024 whale-optimization-based feature-selection pipeline for Parkinson's disease diagnosis from MRI \cite{Priyadharshini:2024}. This value was chosen so that a modest reduction in feature count is rewarded only when it does not come at a material cost to balanced accuracy, reflecting the clinical framing of this study as favoring parsimonious acoustic measurement panels for low-burden screening, without allowing the parsimony term to dominate the primary diagnostic objective. Lower fitness is better; every optimizer in this study is implemented as a minimizer.
 
-\subsection{The Proposed Method: CSO with a Per-Particle Searched Transfer Function}
+\subsection{Our Proposed Pipeline: The Joint Optimization via Competitive Swarm Optimizer}
 \label{sec:3.6}
 
-The proposed method is the original Competitive Swarm Optimizer (CSO)
-\cite{Cheng:2015} itself, unmodified -- no additional search strategies are
-layered on top of it. Its only departure from a textbook CSO
-re-implementation is the encoding it searches over (Section~\ref{sec:3.3}):
-each particle carries a transfer-function-selector segment, so which of
-5 candidate transfer functions binarizes a given particle is decided by
-the search itself, rather than fixed in advance the way every reproduced
-baseline fixes its own.
+The contribution of this study is not a new metaheuristic operator but a
+new object for an existing one to search over. As reviewed in
+Section~\ref{sec:2.3}, published metaheuristic pipelines for PD voice
+screening almost universally treat the transfer function, the feature
+subset, and the classifier configuration as three separate decisions, of
+which at most two are ever optimized together and the third is fixed by
+hand in advance. This section describes the pipeline that instead
+searches all three jointly, within the single $5+D+5$-dimensional
+encoding of Section~\ref{sec:3.3} and the fitness of Section~\ref{sec:3.5},
+using the Competitive Swarm Optimizer (CSO) \cite{Cheng:2015} as the
+search engine that explores this space generation by generation. CSO's
+own pairwise-competition update rule is adopted in its original,
+published form -- no new operator is layered on top of it -- but, as
+detailed below, every one of its competitions now also implicitly
+resolves which of five binarization schemes governs the losing particle
+going forward, not only which feature-and-classifier configuration it
+moves toward.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\linewidth]{figures/CSO.pdf}
-  \caption{The CSO per-generation flow \cite{Cheng:2015}, unmodified by
-    this study: the population is randomly paired into one-on-one
-    competitions; each pair's winner passes to the next generation
-    unchanged (learning-free), while its loser updates toward the winner
-    (learning). Figure~\ref{fig:tf-selector} details what "learning" means
-    once the transfer-function-selector segment is part of the loser's
-    own position.}
+  \caption{The CSO per-generation flow \cite{Cheng:2015}, adopted by this
+    pipeline in its original form: the population is randomly paired into
+    one-on-one competitions; each pair's winner passes to the next
+    generation unchanged (learning-free), while its loser updates toward
+    the winner (learning). Figure~\ref{fig:tf-selector} details what
+    "learning" means once the transfer-function-selector segment is part
+    of the loser's own position.}
   \label{fig:cso}
 \end{figure}
 
-\textbf{Base algorithm (CSO).} The Competitive Swarm Optimizer (CSO)
+\textbf{Search engine: CSO.} The Competitive Swarm Optimizer (CSO)
 \cite{Cheng:2015} was originally proposed for \emph{large-scale}
 optimization, and departs from the attractor-based update rule common to
 PSO and its many derivatives, where every particle is pulled toward one
@@ -395,8 +404,14 @@ draws its next position from whichever particle it happens to be paired
 against that generation, rather than from a single swarm-wide attractor
 -- a design intended to preserve swarm diversity and scale more
 gracefully to high-dimensional search spaces than attractor-based
-updates. Concretely, each generation, the population of $N$
-particles (an even number) is randomly paired into $N/2$ one-on-one
+updates. This property is the reason CSO is adopted here rather than,
+e.g., a PSO variant already reproduced among the baselines
+(Section~\ref{sec:3.7}): the joint encoding of Section~\ref{sec:3.3} is 5
+dimensions larger than a feature-and-classifier-only encoding of the same
+dataset, and resistance to premature convergence is correspondingly more
+valuable, not merely a large-scale-benchmark curiosity
+(Section~\ref{sec:2.3}). Concretely, each generation, the population of
+$N$ particles (an even number) is randomly paired into $N/2$ one-on-one
 competitions. Within each pair, the fitter particle (the \emph{winner})
 passes to the next generation completely unchanged; the weaker particle
 (the \emph{loser}) updates its velocity and position toward the winner:
@@ -408,22 +423,33 @@ where $x_w, x_l$ are the winner's and loser's positions, $\bar{x}$ is the
 population mean position, $r_1, r_2, r_3$ are independent uniform random
 vectors, and $\phi$ is CSO's social-term control coefficient (Eq.\ 25--26,
 \cite{Cheng:2015}), which is exactly 0 for the swarm sizes used in this
-study ($N=30 \le 100$) -- so plain CSO at this scale has no mean-position
-pull at all, only the winner-attraction and inertia terms.
+study ($N=30 \le 100$) -- so at this scale the update reduces to
+winner-attraction and inertia only, with no mean-position pull. No term
+above is specific to feature selection, classifier choice, or
+transfer-function selection: CSO updates whichever position vector it is
+given, which is precisely what lets Section~\ref{sec:3.3}'s larger,
+jointly-encoded position slot into an otherwise-unmodified update rule.
 
 \textbf{Per-particle transfer-function selection.} Every loser's update
 above operates on its \emph{entire} position, including the
 transfer-function-selector segment introduced in Section~\ref{sec:3.3} --
 so a loser's selector segment is updated by the same velocity/position
 rule as the rest of its position, and can therefore change which
-transfer function that particle uses from one generation to the next.
-Once a loser's new position is computed, it is decoded in two steps
-(Figure~\ref{fig:tf-selector}): first, an argmax over its own leading
-5-dim selector segment picks one of the 5 candidate transfer functions of
-Section~\ref{sec:3.4}; second, that candidate binarizes the particle's
-trailing $D+5$ dimensions into the feature mask and classifier mask used
-to evaluate its fitness. Winners are unaffected, since they are carried
-over completely unchanged, selector segment included.
+transfer function that particle uses from one generation to the next,
+exactly as its feature-mask and classifier-mask segments can change which
+features and classifiers it uses. Once a loser's new position is
+computed, it is decoded in two steps (Figure~\ref{fig:tf-selector}):
+first, an argmax over its own leading 5-dim selector segment picks one of
+the 5 candidate transfer functions of Section~\ref{sec:3.4}; second, that
+candidate binarizes the particle's trailing $D+5$ dimensions into the
+feature mask and classifier mask used to evaluate its fitness
+(Section~\ref{sec:3.5}). Winners are unaffected, since they are carried
+over completely unchanged, selector segment included. This decode step,
+not CSO's update rule, is where this study's contribution is realized: it
+is what turns a population of otherwise-ordinary CSO particles into a
+population that is simultaneously searching feature subsets, classifier
+configurations, and its own binarization scheme, one joint decision per
+particle per generation.
 
 \begin{figure}[t]
   \centering
@@ -438,6 +464,24 @@ over completely unchanged, selector segment included.
     across generations, may resolve to different candidates.}
   \label{fig:tf-selector}
 \end{figure}
+
+Taken together, Sections~\ref{sec:3.3}--\ref{sec:3.6} describe one
+pipeline, not four independent pieces: the encoding determines what a
+particle's position means (transfer-function choice, feature subset, and
+classifier configuration, all at once); the candidate pool of
+Section~\ref{sec:3.4} determines what a transfer-function choice can
+resolve to; the fitness of Section~\ref{sec:3.5} determines how any one
+decoded solution is scored; and CSO, described above, determines how the
+population moves through that space generation by generation. Reusing
+CSO's own competitive update rule unchanged is a deliberate design
+choice made in service of this pipeline, so that any performance
+difference against the reproduced baselines of Section~\ref{sec:3.7} can
+be attributed to the joint encoding and its decode step rather than to a
+new, unproven movement rule -- it is not evidence that the proposed
+pipeline reduces to CSO itself: a plain CSO run over the baselines' own
+$D+5$ encoding would have no transfer-function-selector segment to search
+over at all, and so could not carry out the joint optimization this
+pipeline is built around.
 
 \subsection{Comparison Methods}
 \label{sec:3.7}

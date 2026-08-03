@@ -17,6 +17,12 @@ with one fixed candidate for every particle/generation instead; unused by
 the registered `CSO_searched_tf` algorithm (always `None`), available for
 ad-hoc analysis.
 
+`fixed_phi` overrides the social-term coefficient (Eq. 25-26) with a fixed
+value instead of deriving it from `cso_phi(pop_size)` (which is exactly 0 at
+this project's swarm sizes, `pop_size<=100`); unused by `CSO_searched_tf`
+(always `None`, i.e. today's `cso_phi(pop_size)` behavior), used only by
+`run_phi_sensitivity.py`'s sweep over fixed phi values.
+
 `classifier_encoding` selects how the classifier-mask segment decodes (see
 `FitnessEvaluator.evaluate_searched_tf`): `"multi_hot"` (default) is this
 project's own multi-classifier soft-voting ensemble; `"top1"` matches the 7
@@ -58,6 +64,7 @@ def run_cso(
     max_evaluations=None,
     classifier_encoding="multi_hot",
     fixed_tf_index=None,
+    fixed_phi=None,
 ):
     if pop_size % 2 != 0:
         raise ValueError("pop_size must be even (CSO pairs particles up)")
@@ -84,7 +91,7 @@ def run_cso(
 
     for gen, t_frac in generation_schedule(n_generations, max_evaluations, evaluator):
         order = rng.permutation(pop_size)
-        phi = cso_phi(pop_size)  # Cheng & Jin (2015), Eq. 25-26
+        phi = cso_phi(pop_size) if fixed_phi is None else fixed_phi  # Cheng & Jin (2015), Eq. 25-26
 
         for k in range(0, pop_size, 2):
             i, j = int(order[k]), int(order[k + 1])
