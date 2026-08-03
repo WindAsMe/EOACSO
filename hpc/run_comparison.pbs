@@ -3,6 +3,7 @@
 #PBS -q sc
 #PBS -l select=1:ncpus=32:mem=64gb
 #PBS -l walltime=24:00:00
+#PBS -W group_list=c30636
 #PBS -o logs/eoacso-comparison.out
 #PBS -e logs/eoacso-comparison.err
 #PBS -V
