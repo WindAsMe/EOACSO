@@ -82,11 +82,21 @@ naranjo: X=(240, 45) y_pos=120/240 groups=80
 qsub hpc/run_comparison.pbs
 ```
 
-Defaults to the `sc` queue with a deliberately modest 6h walltime and
-requests one full socket (`select=1:nsockets=1`, 32 cores). Estimated
-actual runtime is well under 6h (160 runs, parallelized 32-way), but if
-the job hits the walltime limit before finishing, just `qsub` it again --
-see the `--resume` note below.
+Requests the `sc` queue and one full socket (`select=1:nsockets=1`, 32
+cores), walltime `23:30:00` -- just under `sc`'s 24h
+`resources_max.walltime`. This was originally a "deliberately modest" 6h on
+the assumption the whole 160/440-run sweep would finish comfortably within
+it; that assumption was wrong. A real single (algorithm, dataset, run) or
+(phi, dataset, run) triple takes 6,000-21,000s (1.7-5.8h) under
+`multi_hot` classifier_encoding (several classifiers trained per fitness
+evaluation, up to 3000 evaluations per run) -- 32-way parallelism runs more
+of these triples *at once*, it does not make any single one faster, so the
+old 6h window let each of the 32 workers barely finish one triple before
+`qstat`'s log showed `PBS: job killed: walltime ... exceeded limit ...`,
+leaving only ~20 of the needed rows on disk. At `~15,000s/run x 32
+workers`, expect to `qsub` each job **2-3 times** (thanks to `--resume`,
+below) before every row is done -- a walltime-kill never loses
+already-completed rows, it just needs a plain resubmission to continue.
 
 For the proposed method's phi (CSO social-term coefficient) sensitivity
 sweep -- 11 fixed phi values x 20 runs x 2 datasets = 440 runs, scoped to
@@ -96,17 +106,19 @@ separately:
 qsub hpc/run_phi_sensitivity.pbs
 ```
 
-**Why 6h, not something larger "to be safe":** this cluster's prepaid
-queues (`ec`/`sc`/`lc`) pre-check token budget assuming the job runs for
-its *entire requested* walltime, and reject submission outright ("Token
-limit exceeded") if that worst case would push usage over 100% -- see
-`gakusai_Users_Guide_ja_1.1.pdf` section 1.6.1. Run `show_token` to see
-current balance/usage:
+**On walltime and token budget:** this cluster's prepaid queues
+(`ec`/`sc`/`lc`) pre-check token budget assuming the job runs for its
+*entire requested* walltime, and reject submission outright ("Token limit
+exceeded") if that worst case would push usage over 100% -- see
+`gakusai_Users_Guide_ja_1.1.pdf` section 1.6.1. The 23:30 setting above
+reserves ~4x more token budget per attempt than the old 6h one. Run
+`show_token` to see current balance/usage:
 ```bash
 show_token
 ```
-Raise walltime in the `.pbs` files only if 6h genuinely isn't enough and
-your token balance supports it.
+Lower walltime in the `.pbs` files only if your token balance can't support
+23:30 per attempt -- a shorter window just means more resubmissions, not
+lost work.
 
 Check job status / cancel:
 ```bash

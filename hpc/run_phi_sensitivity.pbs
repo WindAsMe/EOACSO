@@ -2,7 +2,7 @@
 #PBS -N cso-phi-sensitivity
 #PBS -q sc
 #PBS -l select=1:nsockets=1
-#PBS -l walltime=6:00:00
+#PBS -l walltime=23:30:00
 #PBS -W group_list=c30636
 #PBS -j oe
 
@@ -12,12 +12,20 @@
 # of the 7 reproduced baselines. Every (phi, dataset, run) triple is
 # independent -- run_phi_values() already parallelizes them across a
 # ProcessPoolExecutor internally, so one 1-socket job is the right shape, no
-# job array needed. Resource syntax/walltime rationale matches
-# run_comparison.pbs (see that file's header comment) -- CSO_searched_tf is
-# also this project's cheapest-per-generation algorithm (pop_size/2 evals per
-# generation, see run_fs_experiment.py's _EVALS_PER_GENERATION), so 440 runs
-# of it should not exceed the main comparison job's (320 mixed-algorithm
-# runs) actual walltime by much, despite the larger run count.
+# job array needed. Resource syntax matches run_comparison.pbs (see that
+# file's header comment).
+#
+# walltime was originally 6h on the same wrong "finishes in a few hours"
+# assumption as run_comparison.pbs -- actual `elapsed_sec` in
+# results/tables/*_phi_sensitivity_results.csv shows 6,000-21,000s (1.7-5.8h)
+# per single (phi, dataset, run) triple (multi_hot classifier_encoding
+# trains several classifiers per fitness evaluation, x up to 3000
+# evaluations), so the 6h job only got ~20 of the needed 440 rows done
+# before "PBS: job killed: walltime ... exceeded limit ...". 23:30 (just
+# under sc's 24h resources_max.walltime) gives each attempt ~6-7x more
+# room; at ~15,000s/run x 32 workers, expect ~3 submissions total to finish
+# all 440 rows (`--resume` below means a walltime-kill never loses
+# already-completed rows -- just `qsub` this file again).
 
 set -euo pipefail
 NCPUS=32

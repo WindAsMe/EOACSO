@@ -2,7 +2,7 @@
 #PBS -N cso-comparison
 #PBS -q sc
 #PBS -l select=1:nsockets=1
-#PBS -l walltime=6:00:00
+#PBS -l walltime=23:30:00
 #PBS -W group_list=c30636
 #PBS -j oe
 
@@ -18,15 +18,25 @@
 # (each worker is pinned to 1 BLAS thread; see _limit_threads_per_worker in
 # run_fs_experiment.py).
 #
-# walltime is deliberately modest (6h, not 24h): this cluster's prepaid
-# queues (see gakusai_Users_Guide_ja_1.1.pdf 1.6.1) pre-check token budget
-# assuming the job runs for its FULL requested walltime, and reject
-# submission outright ("Token limit exceeded") if that worst case would
-# push usage over 100% -- even though this job realistically finishes in
-# a few hours. Run `show_token` to check actual balance; raise walltime
-# back up only if 6h genuinely isn't enough (the job can just be
-# `qsub`'d again with --resume either way, so under-requesting costs
-# only a resubmission, not lost work).
+# walltime was originally a "deliberately modest" 6h, on the assumption
+# this job would realistically finish in a few hours -- that assumption was
+# WRONG and cost a full 6h job attempt with almost nothing to show for it.
+# A real run (`elapsed_sec` in results/tables/*_comparison_results.csv)
+# takes 6,000-21,000s (1.7-5.8h) per single (algorithm, dataset, run)
+# triple under multi_hot classifier_encoding (several classifiers, one with
+# CalibratedClassifierCV, trained per fold per fitness evaluation, x up to
+# 3000 evaluations) -- 32-way parallelism only runs MORE OF THESE triples
+# at once, it doesn't make any one of them faster, so a 6h window only let
+# each of the 32 workers barely finish 1 triple before getting killed
+# ("PBS: job killed: walltime ... exceeded limit ..."), leaving only ~20 of
+# the needed 320 rows on disk. 23:30 (just under sc's 24h
+# resources_max.walltime) gives each attempt roughly 6-7x more room; at
+# ~15,000s/run x 32 workers, expect ~2 submissions total to finish all 320
+# rows (`--resume` below means a walltime-kill never loses already-completed
+# rows -- just `qsub` this file again and it picks up where it left off).
+# This also reserves ~4x more prepaid token budget per attempt than the old
+# 6h setting (see gakusai_Users_Guide_ja_1.1.pdf 1.6.1) -- run `show_token`
+# before resubmitting if unsure of remaining balance.
 
 set -euo pipefail
 NCPUS=32
