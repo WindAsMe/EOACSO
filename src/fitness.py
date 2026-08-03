@@ -22,7 +22,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVC
 from xgboost import XGBClassifier
 
-from src.optimizers.base import CLASSIFIER_NAMES, decode_bits_top1, decode_particle, stochastic_binarize
+from src.optimizers.base import CLASSIFIER_NAMES, decode_bits, decode_bits_top1
+from src.optimizers.transfer import N_TF_CANDIDATES, TF_CANDIDATES, decode_and_binarize_searched_tf
 
 
 def build_classifiers(seed, names=None):
@@ -67,20 +68,32 @@ class FitnessEvaluator:
             )
         )
 
-    def evaluate(self, position, rng, classifier_encoding="multi_hot"):
-        """`classifier_encoding="multi_hot"` (default) decodes the last 5 dims
-        as independent on/off switches -- several classifiers can join the
-        soft-voting ensemble (`decode_particle`/`decode_bits`). `"top1"`
-        instead picks a single classifier via argmax of the raw scores
-        (`decode_bits_top1`), matching the 8 reproduced baselines' encoding --
-        used to let EOACSO_Paper's own ablation study be re-run under that cheaper,
-        single-classifier scheme for a quick look."""
+    def evaluate_searched_tf(self, position, prev_bits, rng, classifier_encoding="multi_hot", fixed_tf_index=None):
+        """Proposed-method-only pathway (`src/optimizers/cso.py`): each
+        particle's *leading* 5-dim segment selects which transfer function
+        binarizes its own *trailing* feature+classifier segment
+        (`transfer.TF_CANDIDATES`) -- position layout
+        `[t_1..t_5 | f_1..f_D | c_1..c_5]` -- rather than every algorithm
+        sharing one hard-coded transfer function the way the 7 reproduced
+        baselines do. `fixed_tf_index` forces a single candidate for every
+        particle/generation instead of letting each particle search its own
+        choice; unused by the registered `CSO_searched_tf` algorithm (always
+        `None` there), available for ad-hoc analysis.
+
+        Returns `(bits, fitness, info)`, matching
+        `transfer.binarize_and_eval`'s tuple order, so `cso.py`'s call site
+        reads like every other optimizer's."""
+        bits, tf_idx = decode_and_binarize_searched_tf(position, prev_bits, rng, fixed_tf_index)
+        seg_bits = bits[N_TF_CANDIDATES:]
+        seg_position = position[N_TF_CANDIDATES:]
         if classifier_encoding == "top1":
-            bits = stochastic_binarize(position, rng)
-            feature_mask, clf_mask = decode_bits_top1(bits, position, self.n_features, rng)
+            feature_mask, clf_mask = decode_bits_top1(seg_bits, seg_position, self.n_features, rng)
         else:
-            feature_mask, clf_mask = decode_particle(position, self.n_features, rng)
-        return self.evaluate_masks(feature_mask, clf_mask)
+            feature_mask, clf_mask = decode_bits(seg_bits, self.n_features, rng)
+        fitness, info = self.evaluate_masks(feature_mask, clf_mask)
+        info["tf_index"] = tf_idx
+        info["tf_name"] = TF_CANDIDATES[tf_idx].name
+        return bits, fitness, info
 
     def evaluate_masks(self, feature_mask, clf_mask):
         active = [name for name, on in zip(CLASSIFIER_NAMES, clf_mask) if on]

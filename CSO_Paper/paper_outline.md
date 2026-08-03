@@ -6,10 +6,9 @@
 > 而不是反过来把算法本身当作唯一卖点。相应地：临床背景、生物标志物的生理解释、
 > 筛查工具的临床定位与局限性，都要比纯CS版本的提纲写得更重、更具体。
 
-## 0. 题目 / Title（候选）
-- "A Feature- and Classifier-Optimized Voice Analysis Pipeline for Parkinson's Disease Screening: An Elite-guided Competitive Swarm Approach"
-- "Toward Interpretable Voice-Based Parkinson's Disease Screening via Joint Feature-Classifier Optimization"
-- 备选思路：标题主语是"诊断/筛查流程"，EOACSO 作为方法学名词放在副标题，不放在最前面
+## 0. 题目 / Title
+- **"A Fully Searched Voice Analysis Pipeline for Parkinson's Disease Screening: Joint Feature, Classifier, and Transfer-Function Optimization via Competitive Swarm Optimization"**
+  （筛查流程为主语，方法为副标题；不再提 EOACSO——现在的方法是普通 CSO，"创新"落在联合搜索的编码本身，尤其是把 transfer function 的选择也纳入搜索）
 
 ## 1. Abstract（建议用结构化摘要：Background / Objective / Methods / Results / Conclusion）
 - **Background**：PD患病率与早期诊断的临床价值；~90%患者有言语障碍(dysphonia)，且可能早于/伴随运动症状出现，是潜在的低成本、非侵入性生物标志物

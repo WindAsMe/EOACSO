@@ -78,5 +78,4 @@ def run_mgwo_ep(
         best_info=gbest_info,
         history=history,
         n_evaluations=evaluator.n_evaluations,
-        archive=[],
     )

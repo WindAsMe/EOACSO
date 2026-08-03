@@ -7,7 +7,7 @@ a *different*, SLURM-based cluster, if this project ever runs on one).
 
 Confirmed cluster facts (re-verify if anything below stops matching; the
 authoritative source is the cluster's own user guide,
-`EOACSO_Paper/gakusai_Users_Guide_ja_1.1.pdf`, sections 5.2-5.4):
+`CSO_Paper/gakusai_Users_Guide_ja_1.1.pdf`, sections 5.2-5.4):
 - No anaconda/miniconda/python entry in `module avail` -- only compilers,
   CUDA/nvidia toolkits, a few simulation packages, and standalone
   `pytorch`/`tensorflow-keras`/`mxnet` modules.
@@ -80,14 +80,13 @@ naranjo: X=(240, 45) y_pos=120/240 groups=80
 
 ```bash
 qsub hpc/run_comparison.pbs
-qsub hpc/run_ablation.pbs
 ```
 
-Both default to the `sc` queue with a deliberately modest 6h walltime and
-request one full socket (`select=1:nsockets=1`, 32 cores). Estimated
-actual runtime is well under 6h (320 runs / 200 runs respectively,
-parallelized 32-way), but if a job hits the walltime limit before
-finishing, just `qsub` it again -- see the `--resume` note below.
+Defaults to the `sc` queue with a deliberately modest 6h walltime and
+requests one full socket (`select=1:nsockets=1`, 32 cores). Estimated
+actual runtime is well under 6h (160 runs, parallelized 32-way), but if
+the job hits the walltime limit before finishing, just `qsub` it again --
+see the `--resume` note below.
 
 **Why 6h, not something larger "to be safe":** this cluster's prepaid
 queues (`ec`/`sc`/`lc`) pre-check token budget assuming the job runs for

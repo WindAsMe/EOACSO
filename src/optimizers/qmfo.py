@@ -159,5 +159,4 @@ def run_qmfo(
         best_info=gbest_info,
         history=history,
         n_evaluations=evaluator.n_evaluations,
-        archive=[],
     )

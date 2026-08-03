@@ -1,5 +1,6 @@
 % ============================================================
-% Bibliography for the EOACSO / PD voice screening manuscript
+% Bibliography for the CSO-based joint feature/classifier/transfer-function
+% optimization / PD voice screening manuscript
 % ============================================================
 % Citation keys use the "FirstAuthor:Year" convention (e.g. Hashemi:2026).
 % For the one group-authored entry (GBD 2016 Parkinson's Disease
@@ -263,23 +264,6 @@
   pages   = {e3430}
 }
 
-@article{PintoNeto:2024,
-  author  = {Pinto Neto, Osmar},
-  title   = {Harnessing Voice Analysis and Machine Learning for Early Diagnosis of {P}arkinson's Disease: A Comparative Study Across Three Datasets},
-  journal = {Journal of Voice},
-  year    = {2024}
-}
-
-@article{Lim:2025,
-  author  = {Lim, Wee Shin and Chiu, Shu-I and Peng, Pei-Ling and Jang, Jyh-Shing Roger and Lee, Sol-Hee and Lin, Chin-Hsien and Kim, Han-Joon},
-  title   = {A cross-language speech model for detection of {P}arkinson's disease},
-  journal = {Journal of Neural Transmission},
-  year    = {2025},
-  volume  = {132},
-  number  = {4},
-  pages   = {579--590}
-}
-
 @article{Sun:2024,
   author  = {Sun, Yue-meng and Wang, Zhi-yun and Liang, Yuan-yuan and Hao, Chen-wei and Shi, Chang-he},
   title   = {Digital biomarkers for precision diagnosis and monitoring in {P}arkinson's disease},
@@ -317,6 +301,98 @@
   pages   = {2816}
 }
 
+% ============================================================
+% Classic method references for Methods (Section 3): the candidate
+% classifiers, the probability-calibration and evaluation-metric choices,
+% and the statistical-testing methodology. All verified against the
+% publisher page / JMLR / DOI resolver, not taken from memory.
+% ============================================================
+
+@inproceedings{Chen:2016,
+  author    = {Chen, Tianqi and Guestrin, Carlos},
+  title     = {{XGB}oost: A Scalable Tree Boosting System},
+  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
+  year      = {2016},
+  pages     = {785--794}
+}
+
+@article{Zhang:2025,
+  author  = {Zhang, Qian and Sheng, Jinhua and Zhou, Rougang and Zhang, Qiao and Wang, Binbing and Zhang, Rong},
+  title   = {Enhanced particle swarm optimization for feature selection in {SVM}-based {A}lzheimer's disease diagnosis},
+  journal = {Scientific Reports},
+  year    = {2025},
+  volume  = {15},
+  pages   = {24243}
+}
+
+@article{Ding:2025,
+  author  = {Ding, Junyao and Du, Jianchao and Wang, Hejie and Xiao, Song},
+  title   = {A novel two-stage feature selection method based on random forest and improved genetic algorithm for enhancing classification in machine learning},
+  journal = {Scientific Reports},
+  year    = {2025},
+  volume  = {15},
+  pages   = {16828}
+}
+
+@article{Panagiotopoulos:2023,
+  author  = {Panagiotopoulos, Konstantinos and Korfiati, Aigli and Theofilatos, Konstantinos and Hurwitz, Peter and Deriu, Marco Agostino and Mavroudi, Seferina},
+  title   = {{MEvA-X}: a hybrid multiobjective evolutionary tool using an {XGB}oost classifier for biomarkers discovery on biomedical datasets},
+  journal = {Bioinformatics},
+  year    = {2023},
+  volume  = {39},
+  number  = {7},
+  pages   = {btad384}
+}
+
+@article{Priyadarshini:2023,
+  author  = {Priyadarshini, Jayaraju and Premalatha, Mariappan and {\v{C}}ep, Robert and Jayasudha, Murugan and Kalita, Kanak},
+  title   = {Analyzing Physics-Inspired Metaheuristic Algorithms in Feature Selection with {K}-Nearest-Neighbor},
+  journal = {Applied Sciences},
+  year    = {2023},
+  volume  = {13},
+  number  = {2},
+  pages   = {906}
+}
+
+@article{Mishra:2025,
+  author  = {Mishra, Pawan and Pooja and Tripathi, Shashi Prakash and Rathore, Vandana},
+  title   = {Enhancing Chronic Kidney Disease Diagnosis with Modified Logistic Regression and Particle Swarm Optimization},
+  journal = {SN Computer Science},
+  year    = {2025},
+  volume  = {6},
+  number  = {6},
+  pages   = {562}
+}
+
+@article{Palmal:2023,
+  author  = {Palmal, Susmita and Saha, Sriparna and Tripathy, Somanath},
+  title   = {Multi-objective optimization with majority voting ensemble of classifiers for prediction of {HIV-1} protease cleavage site},
+  journal = {Soft Computing},
+  year    = {2023},
+  volume  = {27},
+  number  = {17},
+  pages   = {12211--12221}
+}
+
+@article{Kuntalp:2024,
+  author  = {Kuntalp, Damla G{\"u}rkan and {\"O}zcan, Nermin and D{\"u}zyel, Okan and Kababulut, Fevzi Yasin and Kuntalp, Mehmet},
+  title   = {A Comparative Study of Metaheuristic Feature Selection Algorithms for Respiratory Disease Classification},
+  journal = {Diagnostics},
+  year    = {2024},
+  volume  = {14},
+  number  = {19},
+  pages   = {2244}
+}
+
+@article{Mirjalili:2013,
+  author  = {Mirjalili, Seyedali and Lewis, Andrew},
+  title   = {S-shaped versus V-shaped transfer functions for binary Particle Swarm Optimization},
+  journal = {Swarm and Evolutionary Computation},
+  year    = {2013},
+  volume  = {9},
+  pages   = {1--14}
+}
+
 @article{Shukla:2024,
   author  = {Shukla, Alok Kumar},
   title   = {Simultaneously feature selection and parameters optimization by teaching--learning and genetic algorithms for diagnosis of breast cancer},
@@ -327,49 +403,13 @@
   pages   = {1051--1072}
 }
 
-% ============================================================
-% Classic method references for Methods (Section 3): the candidate
-% classifiers, the probability-calibration and evaluation-metric choices,
-% the opposition-based-learning strategy underlying EOACSO's Strategy 3,
-% and the statistical-testing methodology. All verified against the
-% publisher page / JMLR / DOI resolver, not taken from memory.
-% ============================================================
-
-@article{Cortes:1995,
-  author  = {Cortes, Corinna and Vapnik, Vladimir},
-  title   = {Support-Vector Networks},
-  journal = {Machine Learning},
-  year    = {1995},
-  volume  = {20},
-  number  = {3},
-  pages   = {273--297}
-}
-
-@article{Breiman:2001,
-  author  = {Breiman, Leo},
-  title   = {Random Forests},
-  journal = {Machine Learning},
-  year    = {2001},
-  volume  = {45},
-  pages   = {5--32}
-}
-
-@inproceedings{Chen:2016,
-  author    = {Chen, Tianqi and Guestrin, Carlos},
-  title     = {{XGB}oost: A Scalable Tree Boosting System},
-  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
-  year      = {2016},
-  pages     = {785--794}
-}
-
-@article{Cover:1967,
-  author  = {Cover, Thomas M. and Hart, Peter E.},
-  title   = {Nearest Neighbor Pattern Classification},
-  journal = {IEEE Transactions on Information Theory},
-  year    = {1967},
-  volume  = {13},
-  number  = {1},
-  pages   = {21--27}
+@article{Priyadharshini:2024,
+  author  = {Priyadharshini, S. and Ramkumar, K. and Vairavasundaram, Subramaniyaswamy and Narasimhan, K. and Venkatesh, S. and Madhavasarma, P. and Kotecha, Ketan},
+  title   = {Bio-inspired feature selection for early diagnosis of {P}arkinson's disease through optimization of deep {3D} nested learning},
+  journal = {Scientific Reports},
+  year    = {2024},
+  volume  = {14},
+  pages   = {23394}
 }
 
 @incollection{Platt:1999,
@@ -417,14 +457,6 @@
   pages   = {675--701}
 }
 
-@inproceedings{Tizhoosh:2005,
-  author    = {Tizhoosh, Hamid R.},
-  title     = {Opposition-Based Learning: A New Scheme for Machine Intelligence},
-  booktitle = {Proceedings of the International Conference on Computational Intelligence for Modelling, Control and Automation (CIMCA)},
-  year      = {2005},
-  pages     = {695--701}
-}
-
 @article{Pedregosa:2011,
   author  = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and Vanderplas, Jake and Passos, Alexandre and Cournapeau, David and Brucher, Matthieu and Perrot, Matthieu and Duchesnay, {\'E}douard},
   title   = {Scikit-learn: Machine Learning in {P}ython},
@@ -433,3 +465,4 @@
   volume  = {12},
   pages   = {2825--2830}
 }
+

@@ -1,12 +1,12 @@
 #!/bin/bash
-#PBS -N eoacso-comparison
+#PBS -N cso-comparison
 #PBS -q sc
 #PBS -l select=1:nsockets=1
 #PBS -l walltime=6:00:00
 #PBS -W group_list=c30636
 #PBS -j oe
 
-# EOACSO_full vs. 7 reproduced baselines, n_runs=20, both datasets.
+# CSO_searched_tf vs. 7 reproduced baselines, n_runs=20, both datasets.
 # Every (algorithm, dataset, run) triple is independent -- run_algorithms()
 # already parallelizes them across a ProcessPoolExecutor internally, so one
 # 1-socket job is the right shape -- no job array needed. This cluster's

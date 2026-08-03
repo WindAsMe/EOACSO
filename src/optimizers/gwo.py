@@ -97,7 +97,6 @@ def run_bgwo(
         best_info=gbest_info,
         history=history,
         n_evaluations=evaluator.n_evaluations,
-        archive=[],
     )
 
 
@@ -137,7 +136,8 @@ def run_hybrid_gwo(
 
     for i in range(pop_size):
         bits[i], fitness[i], infos[i] = binarize_and_eval(
-            positions[i], bits[i], rng, evaluator, n_features, mode="stochastic"
+            positions[i], bits[i], rng, evaluator, n_features, mode="stochastic",
+            classifier_encoding=classifier_encoding,
         )
 
     gbest_idx = int(np.argmin(fitness))
@@ -156,7 +156,8 @@ def run_hybrid_gwo(
         positions = clamp(_gwo_generation(positions, fitness, a, rng, D))
         for i in range(pop_size):
             bits[i], fitness[i], infos[i] = binarize_and_eval(
-                positions[i], bits[i], rng, evaluator, n_features, mode="stochastic"
+                positions[i], bits[i], rng, evaluator, n_features, mode="stochastic",
+                classifier_encoding=classifier_encoding,
             )
 
         gen_best = int(np.argmin(fitness))
@@ -172,5 +173,4 @@ def run_hybrid_gwo(
         best_info=gbest_info,
         history=history,
         n_evaluations=evaluator.n_evaluations,
-        archive=[],
     )

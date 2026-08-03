@@ -1,8 +1,8 @@
-# EOACSO: Elite-guided Opposition-based Archive Competitive Swarm Optimizer for Parkinson's Disease Detection
+# CSO with a Per-Particle Searched Transfer Function for Parkinson's Disease Detection
 
-Joint feature selection + base-classifier selection for a heterogeneous
-ensemble, built on an improved Competitive Swarm Optimizer (CSO), applied to
-two Parkinson's disease voice/speech datasets.
+Joint feature selection + base-classifier selection + transfer-function
+selection for a heterogeneous ensemble, built on the plain Competitive Swarm
+Optimizer (CSO), applied to two Parkinson's disease voice/speech datasets.
 
 ## Algorithm design
 
@@ -20,8 +20,8 @@ feature mask. The last 5 dimensions binarize into independent switches
 choosing which of the 5 candidate classifiers join the final ensemble; all
 active classifiers train on the same selected feature subset and are
 combined by equal-weight soft voting (`src/optimizers/base.py::decode_bits`).
-This is now the default for **every** algorithm in the project -- EOACSO
-and all 7 reproduced baselines alike -- via each runner's
+This is now the default for **every** algorithm in the project -- the
+proposed method and all 7 reproduced baselines alike -- via each runner's
 `classifier_encoding="multi_hot"` default parameter. Pass
 `classifier_encoding="top1"` to any runner (or `--classifier_encoding top1`
 on the CLI entry points) to instead decode top-1 (argmax of the raw
@@ -36,6 +36,14 @@ This lets a single optimizer answer "which features" and "which model(s)"
 together, without ever optimizing ensemble weights or classifier
 hyperparameters directly.
 
+For the proposed method only (not the 7 baselines, which each keep their
+own fixed transfer function), the encoding grows to `D + 10`: 5 further
+dimensions, one per candidate transfer function
+(`src/optimizers/transfer.py::TF_CANDIDATES`), argmaxed per particle to
+pick which of the 5 binarizes that particle's own `D + 5` segment --
+so different particles, and the same particle across generations, may use
+different transfer functions (`src/fitness.py::FitnessEvaluator.evaluate_searched_tf`).
+
 **Fitness** (`src/fitness.py::FitnessEvaluator`): 5-fold `StratifiedGroupKFold`
 cross-validation (grouped by subject to prevent leakage across repeated
 recordings), out-of-fold soft-voting balanced accuracy, combined with a
@@ -49,30 +57,18 @@ Lower is better (this project treats optimization as minimization
 throughout). If a particle decodes to an empty feature mask or an empty
 classifier mask, one bit is force-activated at random (`decode_bits`).
 
-**EOACSO** (`src/optimizers/eoacso.py`) extends the original CSO (Cheng &
-Jin, 2015 -- pairwise random competition each generation, winners pass
-through unchanged, losers update toward the winner) with three strategies,
-each independently toggleable for ablation:
-
-1. **Elite-guided update** (`enable_elite_guided`) -- replaces CSO's
-   uninformative population-mean pull with a pull toward an elite sampled
-   from the archive (see below), weighted by `lambda(t)` that grows from
-   0.1 to 0.9 over the run (exploration-heavy early, exploitation-heavy
-   late).
-2. **Stagnation-triggered opposition-based learning** (`enable_obl`) -- if
-   the global best hasn't improved for `stagnation_limit` generations, the
-   worst `reinit_fraction` of the swarm is reinitialised to its opposite
-   point (`lb+ub-X`) to escape a local optimum.
-3. **Diversity elite archive** (`enable_archive`) -- a bounded non-dominated
-   archive on (error rate, feature ratio), truncated by Hamming-distance
-   crowding when it overflows. Feeds elites to strategy 1 during the search,
-   and afterwards offers alternative accuracy/parsimony trade-off solutions.
-
-Turning all three off (`CSO_vanilla` in the experiment runner) reproduces
-the original CSO on this same encoding, using its exact social-term control
-parameter (`cso_phi`, Eq. 25-26 of Cheng & Jin 2015 -- note this is
-**exactly 0** for swarm sizes <=100, so the "vanilla" fallback has no
-mean-position term at all at our typical population sizes).
+**The proposed method** (`src/optimizers/cso.py::run_cso`) is the original
+CSO (Cheng & Jin, 2015 -- pairwise random competition each generation,
+winners pass through unchanged, losers update toward the winner),
+completely unmodified -- no added search strategies. Its exact social-term
+control parameter (`cso_phi`, Eq. 25-26 of Cheng & Jin 2015) is used as-is
+(this is **exactly 0** for swarm sizes <=100, so there is no mean-position
+term at all at our typical population sizes). The only departure from a
+textbook re-implementation is the encoding it searches over (see above):
+each loser's update also touches its transfer-function-selector segment,
+so which of the 5 candidate transfer functions binarizes a given particle
+can change from one generation to the next, rather than being fixed for
+the whole run.
 
 ## Datasets (`src/data_loader.py`)
 
@@ -88,8 +84,8 @@ Run `python -m src.data_loader` to re-fetch/verify both.
 Per-paper equations were extracted from the PDFs in `Papers/Compare_Papers/`
 and reproduced as optimizer *cores* plugged into this project's own
 encoding and `FitnessEvaluator` (not each paper's own fixed classifier /
-original dataset split) -- so every algorithm below is compared to EOACSO
-under identical conditions. Where a paper doesn't state its own update
+original dataset split) -- so every algorithm below is compared to the
+proposed method under identical conditions. Where a paper doesn't state its own update
 equations (most application papers just cite the base algorithm) the
 canonical published equations are used instead; every such gap-fill is
 documented in the corresponding source file's docstring.
@@ -104,8 +100,8 @@ documented in the corresponding source file's docstring.
 | mHGS | `mhgs.py` | Hashim et al. 2023 | fully specified (Eq. 19-24); population size / iteration count not stated -> project defaults |
 | QMFO | `qmfo.py` | Mansour 2024 | Mayfly eq. fully specified; the "quantum rotation gate" has no formula linking it to position updates -> approximated as a QEA-style rotation nudge toward the global best's bits |
 
-All 8 (BPSO/BBOA/BWOA/BGWO/HybridGWO/MGWO-eP/mHGS/QMFO), plus EOACSO and its
-4 ablation variants, are registered in
+All 8 (BPSO/BBOA/BWOA/BGWO/HybridGWO/MGWO-eP/mHGS/QMFO), plus the 2 CSO
+variants (`CSO_searched_tf`, `CSO_fixed_tf`), are registered in
 `src/experiments/run_fs_experiment.py::ALGORITHMS`.
 
 ## Running experiments
@@ -139,9 +135,9 @@ src/
   fitness.py                  FitnessEvaluator (shared by every optimizer)
   optimizers/
     base.py                   encoding, transfer fn, decode/repair logic
-    transfer.py                S-shaped / V-shaped / hybrid / threshold binarization
-    archive.py                 EliteArchive (strategy 5)
-    eoacso.py                   EOACSO (+ CSO_vanilla via all-flags-off)
+    transfer.py                S-shaped / V-shaped / hybrid / threshold binarization,
+                                 + TF_CANDIDATES/decode_and_binarize_searched_tf
+    cso.py                      plain CSO (CSO_searched_tf / CSO_fixed_tf via fixed_tf_index)
     bpso.py bboa.py bwoa.py     Hashemi et al. 2026 baselines
     gwo.py                      BGWO + WOA->HybridGWO cascade (Al-Najjar et al. 2024)
     mgwo_ep.py                  Santhosh et al. 2025

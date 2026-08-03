@@ -2,8 +2,8 @@
 on the FULL feature set -- no swarm-based feature selection, no classifier-
 pool switching. Uses the same grouped StratifiedGroupKFold protocol as
 FitnessEvaluator so balanced accuracy is directly comparable to the
-EOACSO_Paper/baseline optimizer results, even though there is no feature-count to
-report for a no-FS baseline.
+proposed method's/baseline optimizer results, even though there is no
+feature-count to report for a no-FS baseline.
 
 Two architectures, both reproduced per Oseni, Obanla & Jimoh (2026),
 "Attention-Based Deep Learning for Early Parkinson's Disease Detection with

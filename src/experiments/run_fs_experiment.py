@@ -1,6 +1,7 @@
-"""Run every optimizer available in this project -- EOACSO_Paper (full + ablated
-variants) and the 8 reproduced literature baselines -- for `n_runs`
-independent seeds on a chosen dataset, saving per-run results to CSV.
+"""Run every optimizer available in this project -- the proposed method
+(plain CSO with a per-particle searched transfer function) and the 8
+reproduced literature baselines -- for `n_runs` independent seeds on a chosen
+dataset, saving per-run results to CSV.
 
 Runs are parallelized across (algorithm, run) pairs using a process pool,
 since each is fully independent -- see `_run_single` / `run_algorithm`.
@@ -8,24 +9,19 @@ since each is fully independent -- see `_run_single` / `run_algorithm`.
 Every algorithm is compared under an equal fitness-evaluation budget
 (`max_evaluations`), not equal generation count -- generation count isn't a
 fair unit since algorithms spend very different numbers of evaluations per
-generation (EOACSO_Paper/CSO only re-evaluate losers each generation; BPSO/BBOA/
+generation (CSO only re-evaluates losers each generation; BPSO/BBOA/
 BWOA's hybrid S/V transfer function evaluates two binarization candidates
 per individual; mHGS's production/escaping operators each conditionally
 add extra evaluations). See `src/optimizers/base.py::generation_schedule`
 for how `max_evaluations` becomes the actual stopping condition while a
 per-algorithm *nominal* generation count still normalizes each algorithm's
-internal time-dependent schedules (EOACSO_Paper's lambda(t), the GWO family's
-a(t), MGWO-eP's e(t), mHGS's Shrink(t)/theta(t)).
+internal time-dependent schedules (the GWO family's a(t), MGWO-eP's e(t),
+mHGS's Shrink(t)/theta(t)).
 
-EOACSO_Paper ablation variants (subtractive: start from the full EOACSO_Paper, remove
-one strategy at a time, ending at plain CSO):
-  EOACSO_full             - strategies 2, 3, 5 all enabled
-  EOACSO_no_elite_guided  - strategy 2 disabled (falls back to CSO's mean-position term)
-  EOACSO_no_obl           - strategy 3 disabled (no stagnation-triggered reinit)
-  EOACSO_no_archive       - strategy 5 disabled (elite term falls back to global best)
-  CSO_vanilla             - all three disabled: a plain re-implementation of the
-                            original Competitive Swarm Optimizer on this same
-                            feature+classifier encoding
+The proposed method, CSO_searched_tf: each particle argmaxes its own 5-dim
+transfer-function-selector segment to pick which of transfer.TF_CANDIDATES
+binarizes it, rather than every particle sharing one transfer function fixed
+in advance (see `src/optimizers/cso.py`).
 
 Reproduced baselines (see src/optimizers/*.py docstrings for exact sources
 and which equations are paper-faithful vs. a documented gap-fill):
@@ -53,7 +49,7 @@ from src.optimizers import (
     run_bgwo,
     run_bpso,
     run_bwoa,
-    run_eoacso,
+    run_cso,
     run_hybrid_gwo,
     run_mgwo_ep,
     run_mhgs,
@@ -79,18 +75,10 @@ RECORD_FIELDS = [
     "n_features",
     "active_classifiers",
     "n_evaluations",
-    "archive_size",
+    "transfer_function",
     "elapsed_sec",
     "history",
 ]
-
-EOACSO_VARIANTS = {
-    "EOACSO_full": dict(enable_elite_guided=True, enable_obl=True, enable_archive=True),
-    "EOACSO_no_elite_guided": dict(enable_elite_guided=False, enable_obl=True, enable_archive=True),
-    "EOACSO_no_obl": dict(enable_elite_guided=True, enable_obl=False, enable_archive=True),
-    "EOACSO_no_archive": dict(enable_elite_guided=True, enable_obl=True, enable_archive=False),
-    "CSO_vanilla": dict(enable_elite_guided=False, enable_obl=False, enable_archive=False),
-}
 
 # Expected fitness evaluations spent per generation, used only to derive a
 # *nominal* generation count from (pop_size, max_evaluations) so each
@@ -112,27 +100,11 @@ _EVALS_PER_GENERATION = {
 
 
 def _nominal_generations(algo_name, pop_size, max_evaluations):
-    if algo_name in EOACSO_VARIANTS:
+    if algo_name == "CSO_searched_tf":
         per_gen = pop_size / 2.0
     else:
         per_gen = _EVALS_PER_GENERATION[algo_name](pop_size)
     return max(1, round((max_evaluations - pop_size) / per_gen))
-
-
-def _make_eoacso_runner(kwargs):
-    def runner(evaluator, n_features, pop_size, n_generations, seed, max_evaluations, classifier_encoding):
-        return run_eoacso(
-            evaluator,
-            n_features,
-            pop_size=pop_size,
-            n_generations=n_generations,
-            seed=seed,
-            max_evaluations=max_evaluations,
-            classifier_encoding=classifier_encoding,
-            **kwargs,
-        )
-
-    return runner
 
 
 def _run_hybrid_gwo_adapter(evaluator, n_features, pop_size, n_generations, seed, max_evaluations, classifier_encoding):
@@ -150,7 +122,9 @@ def _run_hybrid_gwo_adapter(evaluator, n_features, pop_size, n_generations, seed
 
 
 ALGORITHMS = {
-    **{name: _make_eoacso_runner(kwargs) for name, kwargs in EOACSO_VARIANTS.items()},
+    "CSO_searched_tf": lambda ev, nf, p, g, s, me, ce: run_cso(
+        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
+    ),
     "BPSO": lambda ev, nf, p, g, s, me, ce: run_bpso(
         ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
     ),
@@ -213,7 +187,7 @@ def _run_single(
         "n_features": result.best_info["n_features"],
         "active_classifiers": ",".join(result.best_info["active_classifiers"]),
         "n_evaluations": result.n_evaluations,
-        "archive_size": len(result.archive),
+        "transfer_function": result.best_info.get("tf_name", ""),
         "elapsed_sec": elapsed,
         "history": json.dumps(result.history),  # [(n_evals, best_fitness_so_far), ...] -- convergence curve
     }
@@ -250,8 +224,8 @@ def run_algorithms(
     NOT resubmit -- `main`'s `resume=True` path populates this from rows
     already present in a prior, interrupted run's output CSV.
 
-    `classifier_encoding` only affects EOACSO_Paper/its ablation variants (the 8
-    baselines always decode top-1 regardless, see `optimizers/base.py`):
+    `classifier_encoding` only affects the proposed method, CSO_searched_tf
+    (the 8 baselines always decode top-1 regardless, see `optimizers/base.py`):
     `"multi_hot"` (default) is this project's multi-classifier soft-voting
     ensemble, `"top1"` matches the baselines' single-classifier scheme."""
     if isinstance(dataset_names, str):
@@ -324,9 +298,8 @@ def main(
     resume=False,
     classifier_encoding="multi_hot",
 ):
-    """Shared engine used by both CLI entry points (`run_comparison.py`,
-    `run_ablation.py`) -- `algorithms` and `output_suffix` are what
-    distinguish the two; nothing else about the run differs.
+    """Shared engine used by the `run_comparison.py` CLI entry point (and
+    directly, for ad-hoc subsets, via `--algorithms`/`--output_suffix` here).
     `dataset_name` may be a single name or a list -- multiple datasets are
     run through ONE shared process pool (see `run_algorithms`) and saved to
     separate per-dataset CSVs.
@@ -387,7 +360,7 @@ def main(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Low-level engine -- prefer run_comparison.py or run_ablation.py as entry points."
+        description="Low-level engine -- prefer run_comparison.py as the entry point."
     )
     parser.add_argument("--dataset", nargs="*", default=["oxford"], choices=["oxford", "naranjo"])
     parser.add_argument("--n_runs", type=int, default=5)
@@ -405,7 +378,7 @@ if __name__ == "__main__":
         "--classifier_encoding",
         choices=["multi_hot", "top1"],
         default="multi_hot",
-        help="EOACSO_Paper/ablation-variants classifier encoding; baselines always decode top-1 regardless",
+        help="proposed-method (CSO_searched_tf) classifier encoding; baselines always decode top-1 regardless",
     )
     args = parser.parse_args()
     main(

@@ -1,6 +1,6 @@
 """Entry point: non-EC neural network baselines (PyTorch MLP and SAINT,
 full feature set, no feature selection) for `n_runs` independent seeds,
-parallelized across a process pool same as run_comparison.py/run_ablation.py.
+parallelized across a process pool same as run_comparison.py.
 
 Both architectures reproduced per Oseni, Obanla & Jimoh (2026), see
 src/baselines_dl.py's module docstring for exactly what is paper-faithful

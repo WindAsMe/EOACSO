@@ -76,5 +76,4 @@ def run_bboa(
         best_info=gbest_info,
         history=history,
         n_evaluations=evaluator.n_evaluations,
-        archive=[],
     )

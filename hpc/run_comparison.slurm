@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=eoacso-comparison
+#SBATCH --job-name=cso-comparison
 #SBATCH --output=logs/%x-%j.out
 #SBATCH --error=logs/%x-%j.err
 #SBATCH --nodes=1
@@ -9,7 +9,7 @@
 #SBATCH --time=24:00:00
 #SBATCH --partition=CHANGE_ME
 
-# EOACSO_full vs. 7 reproduced baselines, n_runs=20, both datasets.
+# CSO_searched_tf vs. 7 reproduced baselines, n_runs=20, both datasets.
 # Every (algorithm, dataset, run) triple is independent -- run_algorithms()
 # already parallelizes them across a ProcessPoolExecutor internally, so a
 # single multi-core job (not a SLURM array) is the right shape here.
