@@ -20,14 +20,10 @@ set -euo pipefail
 mkdir -p logs results/tables
 
 # --- environment ---
-# Option A: conda (recommended, see hpc/environment.yml)
-# module load anaconda3 2>/dev/null || module load miniconda3 2>/dev/null || true
-# source activate eoacso
-
-# Option B: module-provided Python + a project-local venv, if conda isn't
-# available on your cluster:
-# module load python/3.11
-# source .venv/bin/activate
+# This cluster has no anaconda/miniconda/python module (checked via
+# `module avail`), so we activate a self-installed miniconda in $HOME
+# instead (see hpc/README.md for the one-time install step).
+source "$HOME/miniconda3/bin/activate" eoacso
 
 cd "$SLURM_SUBMIT_DIR"
 

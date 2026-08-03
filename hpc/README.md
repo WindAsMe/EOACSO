@@ -2,31 +2,38 @@
 
 ## 1. Get the project onto the cluster
 
-Either:
+Already pushed to GitHub: https://github.com/WindAsMe/EOACSO. On the
+cluster's login node:
 ```bash
-# from your local machine, if the cluster is reachable directly
-rsync -avz --exclude 'results/tables/*.csv' --exclude '__pycache__' \
-    "C:/Users/zhong/Desktop/Parkinson/" you@cluster:/path/to/EOACSO/
+git clone https://github.com/WindAsMe/EOACSO.git
+cd EOACSO
 ```
-or initialize a git repo locally, push to a remote (GitHub/GitLab/institutional),
-and `git clone` on the cluster -- recommended if you'll keep iterating on the
-code, since it also gives you version history/rollback that this project
-doesn't currently have locally.
 
 ## 2. Environment
 
+This cluster's `module avail` has no anaconda/miniconda/python module (only
+compilers, CUDA/nvidia toolkits, a few simulation packages, and standalone
+`pytorch`/`tensorflow-keras`/`mxnet` modules) -- so rather than depending on
+a cluster-provided Python, install a self-contained miniconda in `$HOME`
+once:
 ```bash
-module load anaconda3   # or miniconda3 -- whatever your cluster provides
+wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
+bash ~/miniconda.sh -b -p $HOME/miniconda3
+source $HOME/miniconda3/bin/activate
+
+cd EOACSO
 conda env create -f hpc/environment.yml
 conda activate eoacso
 ```
 `environment.yml` pins Python 3.11 rather than this machine's 3.14 (too new
-to assume broad availability across HPC conda channels); nothing in this
-codebase requires anything past 3.11.
+to assume broad availability across conda channels); nothing in this
+codebase requires anything past 3.11. If the login node has no internet
+access, download the Miniconda installer on your local machine first and
+`scp`/upload it across instead of `wget`-ing directly on the cluster.
 
-If conda isn't available, a `python -m venv .venv` + `pip install -r
-requirements.txt` (plus `pip install xgboost`) works the same way -- just
-swap the activation lines in the `.slurm` scripts.
+The two `.slurm` scripts already point at `$HOME/miniconda3/bin/activate`
+directly (no `module load` needed) -- if your miniconda ends up somewhere
+else, update that line in both scripts.
 
 ## 3. Datasets
 

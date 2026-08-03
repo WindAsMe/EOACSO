@@ -17,8 +17,10 @@
 set -euo pipefail
 mkdir -p logs results/tables
 
-# module load anaconda3 2>/dev/null || module load miniconda3 2>/dev/null || true
-# source activate eoacso
+# This cluster has no anaconda/miniconda/python module (checked via
+# `module avail`), so we activate a self-installed miniconda in $HOME
+# instead (see hpc/README.md for the one-time install step).
+source "$HOME/miniconda3/bin/activate" eoacso
 
 cd "$SLURM_SUBMIT_DIR"
 
