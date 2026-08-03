@@ -5,15 +5,31 @@ The target cluster (server `sjms`) runs **PBS Professional** (`qstat --version`
 `qsub`/`qstat`/`qdel`, not the `.slurm` files (kept only as a reference for
 a *different*, SLURM-based cluster, if this project ever runs on one).
 
-Confirmed cluster facts (re-verify if anything below stops matching):
+Confirmed cluster facts (re-verify if anything below stops matching; the
+authoritative source is the cluster's own user guide,
+`EOACSO_Paper/gakusai_Users_Guide_ja_1.1.pdf`, sections 5.2-5.4):
 - No anaconda/miniconda/python entry in `module avail` -- only compilers,
   CUDA/nvidia toolkits, a few simulation packages, and standalone
   `pytorch`/`tensorflow-keras`/`mxnet` modules.
 - Queues: `ec`/`sc`/`lc` (CPU-only compute, ascending walltime limits),
   `eg`/`sg`/`lg` (GPU), `xc` (15-minute short queue), and a personal
   `c30636g` queue (GPU-suffixed -- avoid for this CPU-only job).
-- `default_chunk.ncpus = 32` on both `sc` and `lc` (`qstat -Qf <queue> |
-  grep -i cpu`) -- i.e. 32 cores/node.
+- **Resource requests use `nsockets=` (CPU sockets), not `ncpus=`/`mem=`.**
+  Every sample script in the user guide uses `select=<n>:nsockets=<n>[:ompthreads=<n>][:mpiprocs=<n>]`
+  -- `ncpus=`/`mem=` inside `-l select=...` are simply not recognized
+  attributes here and made `qsub` reject the job with the unhelpful "Job
+  has not allowed option" (found by bisecting a minimal test script down
+  to one `#PBS` line at a time, then confirmed against the user guide).
+  1 socket = 32 cores on this hardware (`default_chunk.ncpus = 32` from
+  `qstat -Qf sc`/`qstat -Qf lc`), so `select=1:nsockets=1` is what the
+  `.pbs` scripts here request.
+- `-W group_list=<name>` is mandatory (job submission is rejected without
+  it). This user's groups are `c30636` (personal), `gaussian`, `academic`,
+  `hokudai` (`groups`/`id -a`); `c30636` is what's currently set in the
+  scripts.
+- `-V` (inherit full login-node environment) is rejected by this site's
+  policy -- the scripts source the conda environment explicitly instead
+  and don't need it.
 
 ## 1. Get the project onto the cluster
 
@@ -67,8 +83,8 @@ qsub hpc/run_comparison.pbs
 qsub hpc/run_ablation.pbs
 ```
 
-Both default to the `sc` queue (24h walltime) and request one full node
-(`select=1:ncpus=32:mem=64gb`). Estimated actual runtime is well under 24h
+Both default to the `sc` queue (24h walltime) and request one full socket
+(`select=1:nsockets=1`, 32 cores). Estimated actual runtime is well under 24h
 (320 runs / 200 runs respectively, parallelized 32-way), but if a job hits
 the walltime limit before finishing, just `qsub` it again -- see the
 `--resume` note below. Switch `-q sc` to `-q lc` in the script if you need

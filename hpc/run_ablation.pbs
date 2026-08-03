@@ -1,14 +1,14 @@
 #!/bin/bash
 #PBS -N eoacso-ablation
 #PBS -q sc
-#PBS -l select=1:ncpus=32:mem=64gb
+#PBS -l select=1:nsockets=1
 #PBS -l walltime=24:00:00
 #PBS -W group_list=c30636
-#PBS -o logs/eoacso-ablation.out
-#PBS -e logs/eoacso-ablation.err
+#PBS -j oe
 
-# 5 EOACSO ablation variants, n_runs=20, both datasets. Same one-32-core-job
-# shape as run_comparison.pbs -- see that script's comments for why.
+# 5 EOACSO ablation variants, n_runs=20, both datasets. Same one-socket-job
+# shape as run_comparison.pbs -- see that script's comments for why, and for
+# the nsockets= (not ncpus=/mem=) resource-syntax note.
 
 set -euo pipefail
 NCPUS=32

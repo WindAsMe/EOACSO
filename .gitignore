@@ -18,3 +18,7 @@ results/figures/*.png
 *.log
 logs_*.txt
 logs/
+
+# Third-party cluster documentation (Copyright FUJITSU LIMITED) -- kept
+# locally for reference only, not ours to redistribute in a public repo
+EOACSO_Paper/gakusai_Users_Guide_ja_1.1.pdf

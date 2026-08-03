@@ -1,20 +1,22 @@
 #!/bin/bash
 #PBS -N eoacso-comparison
 #PBS -q sc
-#PBS -l select=1:ncpus=32:mem=64gb
+#PBS -l select=1:nsockets=1
 #PBS -l walltime=24:00:00
 #PBS -W group_list=c30636
-#PBS -o logs/eoacso-comparison.out
-#PBS -e logs/eoacso-comparison.err
+#PBS -j oe
 
 # EOACSO_full vs. 7 reproduced baselines, n_runs=20, both datasets.
 # Every (algorithm, dataset, run) triple is independent -- run_algorithms()
 # already parallelizes them across a ProcessPoolExecutor internally, so one
-# 32-core job (matching this cluster's default_chunk.ncpus=32 per node,
-# confirmed via `qstat -Qf sc`/`qstat -Qf lc`) is the right shape -- no
-# job array needed. NCPUS below MUST match the `ncpus=` value in the
-# `-l select=...` line above (each worker is pinned to 1 BLAS thread; see
-# _limit_threads_per_worker in run_fs_experiment.py).
+# 1-socket job is the right shape -- no job array needed. This cluster's
+# resource syntax is nsockets= (CPU sockets), not ncpus=/mem= (confirmed via
+# the cluster's own user guide, gakusai_Users_Guide_ja_1.1.pdf, section 5.3/
+# 5.4 -- every sample script there uses nsockets=, never ncpus= or mem=).
+# 1 socket = 32 cores on this hardware (matches default_chunk.ncpus=32 from
+# `qstat -Qf sc`/`qstat -Qf lc`). NCPUS below MUST match that core count
+# (each worker is pinned to 1 BLAS thread; see _limit_threads_per_worker in
+# run_fs_experiment.py).
 
 set -euo pipefail
 NCPUS=32
