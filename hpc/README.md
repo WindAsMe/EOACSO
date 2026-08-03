@@ -1,21 +1,32 @@
-# Running on an HPC cluster (SLURM)
+# Running on the cluster (PBS Professional)
+
+The target cluster (server `sjms`) runs **PBS Professional** (`qstat --version`
+-> `pbs_version = 2024.1.2...`), not SLURM -- use `hpc/*.pbs` +
+`qsub`/`qstat`/`qdel`, not the `.slurm` files (kept only as a reference for
+a *different*, SLURM-based cluster, if this project ever runs on one).
+
+Confirmed cluster facts (re-verify if anything below stops matching):
+- No anaconda/miniconda/python entry in `module avail` -- only compilers,
+  CUDA/nvidia toolkits, a few simulation packages, and standalone
+  `pytorch`/`tensorflow-keras`/`mxnet` modules.
+- Queues: `ec`/`sc`/`lc` (CPU-only compute, ascending walltime limits),
+  `eg`/`sg`/`lg` (GPU), `xc` (15-minute short queue), and a personal
+  `c30636g` queue (GPU-suffixed -- avoid for this CPU-only job).
+- `default_chunk.ncpus = 32` on both `sc` and `lc` (`qstat -Qf <queue> |
+  grep -i cpu`) -- i.e. 32 cores/node.
 
 ## 1. Get the project onto the cluster
 
-Already pushed to GitHub: https://github.com/WindAsMe/EOACSO. On the
-cluster's login node:
+Already pushed to GitHub: https://github.com/WindAsMe/EOACSO.
 ```bash
 git clone https://github.com/WindAsMe/EOACSO.git
 cd EOACSO
 ```
+(Already done once -- from here on, `git pull` inside `EOACSO/` picks up
+updates instead of re-cloning.)
 
 ## 2. Environment
 
-This cluster's `module avail` has no anaconda/miniconda/python module (only
-compilers, CUDA/nvidia toolkits, a few simulation packages, and standalone
-`pytorch`/`tensorflow-keras`/`mxnet` modules) -- so rather than depending on
-a cluster-provided Python, install a self-contained miniconda in `$HOME`
-once:
 ```bash
 wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O ~/miniconda.sh
 bash ~/miniconda.sh -b -p $HOME/miniconda3
@@ -31,45 +42,61 @@ codebase requires anything past 3.11. If the login node has no internet
 access, download the Miniconda installer on your local machine first and
 `scp`/upload it across instead of `wget`-ing directly on the cluster.
 
-The two `.slurm` scripts already point at `$HOME/miniconda3/bin/activate`
-directly (no `module load` needed) -- if your miniconda ends up somewhere
-else, update that line in both scripts.
+The two `.pbs` scripts already point at `$HOME/miniconda3/bin/activate`
+directly -- if your miniconda ends up somewhere else, update that line in
+both scripts.
 
 ## 3. Datasets
 
 `data/raw/parkinsons.data` and `data/raw/ReplicatedAcousticFeatures-ParkinsonDatabase.csv`
-must come across with the rest of the project (small CSV/data files, `rsync`/`git`
-both carry them fine). Verify with:
+come across with `git clone`/`git pull` -- no separate transfer needed.
+Verify with:
 ```bash
 python -m src.data_loader
+```
+Expected:
+```
+oxford: X=(195, 22) y_pos=147/195 groups=32
+naranjo: X=(240, 45) y_pos=120/240 groups=80
 ```
 
 ## 4. Submit jobs
 
 ```bash
-sbatch hpc/run_comparison.slurm
-sbatch hpc/run_ablation.slurm
+qsub hpc/run_comparison.pbs
+qsub hpc/run_ablation.pbs
 ```
 
-Edit `--partition=CHANGE_ME` to your cluster's actual partition/queue name
-first, and adjust `--cpus-per-task`/`--mem`/`--time` to what's actually
-available -- 32 cores / 64G / the given walltimes are starting guesses, not
-measured on your cluster's hardware.
+Both default to the `sc` queue (24h walltime) and request one full node
+(`select=1:ncpus=32:mem=64gb`). Estimated actual runtime is well under 24h
+(320 runs / 200 runs respectively, parallelized 32-way), but if a job hits
+the walltime limit before finishing, just `qsub` it again -- see the
+`--resume` note below. Switch `-q sc` to `-q lc` in the script if you need
+more walltime headroom (240h limit, more heavily subscribed per
+`resources_assigned.ncpus`).
 
-**Why one multi-core job, not a SLURM array:** every (algorithm, dataset,
-run) triple is already parallelized internally via `ProcessPoolExecutor`
+Check job status / cancel:
+```bash
+qstat -u $USER
+qdel <job_id>
+```
+
+**Why one 32-core job, not a job array:** every (algorithm, dataset, run)
+triple is already parallelized internally via `ProcessPoolExecutor`
 (`run_algorithms()` in `run_fs_experiment.py`), so `--n_workers` matching
-`--cpus-per-task` is enough to use the whole allocation -- no code changes
+the job's `ncpus` is enough to use the whole allocation -- no code changes
 needed. `n_workers=1` was this project's *local-machine* default (that
 machine had unrelated memory-pressure crashes under parallelism); on a
-dedicated HPC node this restriction doesn't apply.
+dedicated cluster node this restriction doesn't apply.
 
-Both scripts pass `--resume`, so a killed/timed-out job (e.g. hitting
-`--time`) can just be `sbatch`'d again and will skip already-completed
-`(algorithm, dataset, run)` rows instead of restarting.
+Both scripts pass `--resume`, so a killed/timed-out job can just be
+re-submitted with `qsub` and will skip already-completed `(algorithm,
+dataset, run)` rows instead of restarting from scratch.
 
 ## 5. Retrieve results
 
 ```bash
-rsync -avz you@cluster:/path/to/EOACSO/results/tables/ "C:/Users/zhong/Desktop/Parkinson/results/tables/"
+rsync -avz c30636@grand1:~/EOACSO/results/tables/ "C:/Users/zhong/Desktop/Parkinson/results/tables/"
 ```
+(adjust the login host/path if `grand1` is only reachable from inside the
+cluster's own network, e.g. via an intermediate jump host).

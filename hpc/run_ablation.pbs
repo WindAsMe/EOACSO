@@ -1,0 +1,29 @@
+#!/bin/bash
+#PBS -N eoacso-ablation
+#PBS -q sc
+#PBS -l select=1:ncpus=32:mem=64gb
+#PBS -l walltime=24:00:00
+#PBS -o logs/eoacso-ablation.out
+#PBS -e logs/eoacso-ablation.err
+#PBS -V
+
+# 5 EOACSO ablation variants, n_runs=20, both datasets. Same one-32-core-job
+# shape as run_comparison.pbs -- see that script's comments for why.
+
+set -euo pipefail
+NCPUS=32
+
+cd "$PBS_O_WORKDIR"
+mkdir -p logs results/tables
+
+source "$HOME/miniconda3/bin/activate" eoacso
+
+python -m src.experiments.run_ablation \
+    --dataset oxford naranjo \
+    --n_runs 20 \
+    --pop_size 30 \
+    --max_evaluations 3000 \
+    --base_seed 2026 \
+    --cv_folds 5 \
+    --n_workers "$NCPUS" \
+    --resume

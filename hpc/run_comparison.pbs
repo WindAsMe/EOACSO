@@ -1,0 +1,35 @@
+#!/bin/bash
+#PBS -N eoacso-comparison
+#PBS -q sc
+#PBS -l select=1:ncpus=32:mem=64gb
+#PBS -l walltime=24:00:00
+#PBS -o logs/eoacso-comparison.out
+#PBS -e logs/eoacso-comparison.err
+#PBS -V
+
+# EOACSO_full vs. 7 reproduced baselines, n_runs=20, both datasets.
+# Every (algorithm, dataset, run) triple is independent -- run_algorithms()
+# already parallelizes them across a ProcessPoolExecutor internally, so one
+# 32-core job (matching this cluster's default_chunk.ncpus=32 per node,
+# confirmed via `qstat -Qf sc`/`qstat -Qf lc`) is the right shape -- no
+# job array needed. NCPUS below MUST match the `ncpus=` value in the
+# `-l select=...` line above (each worker is pinned to 1 BLAS thread; see
+# _limit_threads_per_worker in run_fs_experiment.py).
+
+set -euo pipefail
+NCPUS=32
+
+cd "$PBS_O_WORKDIR"
+mkdir -p logs results/tables
+
+source "$HOME/miniconda3/bin/activate" eoacso
+
+python -m src.experiments.run_comparison \
+    --dataset oxford naranjo \
+    --n_runs 20 \
+    --pop_size 30 \
+    --max_evaluations 3000 \
+    --base_seed 2026 \
+    --cv_folds 5 \
+    --n_workers "$NCPUS" \
+    --resume
