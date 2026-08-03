@@ -6,7 +6,6 @@
 #PBS -W group_list=c30636
 #PBS -o logs/eoacso-comparison.out
 #PBS -e logs/eoacso-comparison.err
-#PBS -V
 
 # EOACSO_full vs. 7 reproduced baselines, n_runs=20, both datasets.
 # Every (algorithm, dataset, run) triple is independent -- run_algorithms()

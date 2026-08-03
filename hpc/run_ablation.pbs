@@ -6,7 +6,6 @@
 #PBS -W group_list=c30636
 #PBS -o logs/eoacso-ablation.out
 #PBS -e logs/eoacso-ablation.err
-#PBS -V
 
 # 5 EOACSO ablation variants, n_runs=20, both datasets. Same one-32-core-job
 # shape as run_comparison.pbs -- see that script's comments for why.
