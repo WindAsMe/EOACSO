@@ -13,14 +13,14 @@
 \citation{Yang:2020}
 \citation{Cao:2025}
 \citation{Amato:2023}
-\citation{Shukla:2024}
-\citation{Gunduz:2025}
-\citation{Kuntalp:2024}
 \def\@LN@column{1}
 \newmarginnote{note.1.1}{{1}{10945661sp}}
 \@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
 \newlabel{sec:1}{{1}{1}{Introduction}{section.1}{}}
 \newlabel{sec:1@cref}{{[section][1][]1}{[1][1][]1}{}{}{}}
+\citation{Shukla:2024}
+\citation{Gunduz:2025}
+\citation{Kuntalp:2024}
 \def\@LN@column{1}
 \citation{Postuma:2015}
 \citation{Rizzo:2016}
@@ -43,7 +43,7 @@
 \def\@LN@column{1}
 \@writefile{toc}{\contentsline {section}{\numberline {2}Related Work}{3}{section.2}\protected@file@percent }
 \newlabel{sec:2}{{2}{3}{Related Work}{section.2}{}}
-\newlabel{sec:2@cref}{{[section][2][]2}{[1][2][]3}{}{}{}}
+\newlabel{sec:2@cref}{{[section][2][]2}{[1][3][]3}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.1}Current Diagnostic Practice and the Case for Objective Biomarkers}{3}{subsection.2.1}\protected@file@percent }
 \newlabel{sec:2.1}{{2.1}{3}{Current Diagnostic Practice and the Case for Objective Biomarkers}{subsection.2.1}{}}
 \newlabel{sec:2.1@cref}{{[subsection][1][2]2.1}{[1][3][]3}{}{}{}}
@@ -63,9 +63,6 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Datasets and Study Population}{4}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:3.1}{{3.1}{4}{Datasets and Study Population}{subsection.3.1}{}}
 \newlabel{sec:3.1@cref}{{[subsection][1][3]3.1}{[1][4][]4}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data Preprocessing and Subject-Grouped Cross-Validation}{4}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:3.2}{{3.2}{4}{Data Preprocessing and Subject-Grouped Cross-Validation}{subsection.3.2}{}}
-\newlabel{sec:3.2@cref}{{[subsection][2][3]3.2}{[1][4][]4}{}{}{}}
 \citation{Platt:1999}
 \citation{Zhang:2025}
 \citation{Ding:2025}
@@ -73,12 +70,10 @@
 \citation{Priyadarshini:2023}
 \citation{Mishra:2025}
 \citation{Palmal:2023}
-\citation{Kuntalp:2024}
-\citation{Hashemi:2026}
-\citation{Hashemi:2026}
-\citation{Mirjalili:2013}
-\citation{Hashim:2023}
 \def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Data Preprocessing and Subject-Grouped Cross-Validation}{5}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:3.2}{{3.2}{5}{Data Preprocessing and Subject-Grouped Cross-Validation}{subsection.3.2}{}}
+\newlabel{sec:3.2@cref}{{[subsection][2][3]3.2}{[1][4][]5}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Transfer Function-, Feature-, and Classifier- Joint Optimization Encoding}{5}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:3.3}{{3.3}{5}{Transfer Function-, Feature-, and Classifier- Joint Optimization Encoding}{subsection.3.3}{}}
 \newlabel{sec:3.3@cref}{{[subsection][3][3]3.3}{[1][5][]5}{}{}{}}
@@ -90,6 +85,10 @@
 \citation{Hashemi:2026}
 \citation{Mirjalili:2013}
 \citation{Hashim:2023}
+\citation{Kuntalp:2024}
+\citation{Hashemi:2026}
+\citation{Hashemi:2026}
+\citation{Mirjalili:2013}
 \def\@LN@column{1}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Worked example of the encoding and decoding pipeline. A continuous particle position of length $5+D+5$ splits into $5$ transfer function scores ($t_1,\dots  ,t_5$), $D$ feature scores ($f_1,\dots  ,f_D$), and 5 classifier scores ($c_1,\dots  ,c_5$). Each segment passes through a transfer function to produce a binary string; thresholded-off features/classifiers (0) are excluded, and the remainder (1, highlighted) are decoded into a feature mask, here selecting the sub-dataset restricted to columns $f_2, f_3, \ldots  , f_{D-1}, f_D$, and a classifier mask, here selecting SVM and KNN. Every classifier in the mask trains on the same feature subset and is combined by equal-weight soft voting before 5-fold subject-grouped cross-validation.}}{6}{figure.caption.1}\protected@file@percent }
 \providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
@@ -101,17 +100,18 @@
 \newlabel{eq:s-shaped-baseline@cref}{{[equation][2][]2}{[1][6][]6}{}{}{}}
 \newlabel{eq:v-shaped}{{3}{6}{Transfer Functions for Binarization}{equation.3}{}}
 \newlabel{eq:v-shaped@cref}{{[equation][3][]3}{[1][6][]6}{}{}{}}
-\newlabel{eq:v-shaped-tanh}{{4}{6}{Transfer Functions for Binarization}{equation.4}{}}
-\newlabel{eq:v-shaped-tanh@cref}{{[equation][4][]4}{[1][6][]6}{}{}{}}
+\citation{Hashim:2023}
 \citation{Brodersen:2010}
 \citation{Priyadharshini:2024}
 \citation{Cheng:2015}
 \def\@LN@column{1}
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces The five transfer functions used in this study: Top row, left to right: classic S-shaped (Eq. (\ref {eq:s-shaped-classic})) \cite  {Kuntalp:2024}; second S-shaped (Eq. (\ref {eq:s-shaped-baseline})) \cite  {Hashemi:2026}; erf V-shaped (Eq. (\ref {eq:v-shaped})) \cite  {Hashemi:2026}. Bottom row, centered under the top row: tanh V-shaped (Eq. (\ref {eq:v-shaped-tanh}) \cite  {Mirjalili:2013}; hard threshold (Eq. (\ref {eq:threshold})) \cite  {Hashim:2023}, used natively in $[0,1]$.}}{7}{figure.caption.2}\protected@file@percent }
 \newlabel{fig:3.4.1}{{2}{7}{The five transfer functions used in this study: Top row, left to right: classic S-shaped (Eq. (\ref {eq:s-shaped-classic})) \cite {Kuntalp:2024}; second S-shaped (Eq. (\ref {eq:s-shaped-baseline})) \cite {Hashemi:2026}; erf V-shaped (Eq. (\ref {eq:v-shaped})) \cite {Hashemi:2026}. Bottom row, centered under the top row: tanh V-shaped (Eq. (\ref {eq:v-shaped-tanh}) \cite {Mirjalili:2013}; hard threshold (Eq. (\ref {eq:threshold})) \cite {Hashim:2023}, used natively in $[0,1]$}{figure.caption.2}{}}
-\newlabel{fig:3.4.1@cref}{{[figure][2][]2}{[1][5][]7}{}{}{}}
+\newlabel{fig:3.4.1@cref}{{[figure][2][]2}{[1][6][]7}{}{}{}}
+\newlabel{eq:v-shaped-tanh}{{4}{7}{Transfer Functions for Binarization}{equation.4}{}}
+\newlabel{eq:v-shaped-tanh@cref}{{[equation][4][]4}{[1][6][]7}{}{}{}}
 \newlabel{eq:threshold}{{5}{7}{Transfer Functions for Binarization}{equation.5}{}}
-\newlabel{eq:threshold@cref}{{[equation][5][]5}{[1][6][]7}{}{}{}}
+\newlabel{eq:threshold@cref}{{[equation][5][]5}{[1][7][]7}{}{}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Fitness Function}{7}{subsection.3.5}\protected@file@percent }
 \newlabel{sec:3.5}{{3.5}{7}{Fitness Function}{subsection.3.5}{}}
 \newlabel{sec:3.5@cref}{{[subsection][5][3]3.5}{[1][7][]7}{}{}{}}
@@ -235,6 +235,20 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}On the Comparison Between CSO and the Baselines}{19}{subsection.5.2}\protected@file@percent }
 \newlabel{sec:5.2}{{5.2}{19}{On the Comparison Between CSO and the Baselines}{subsection.5.2}{}}
 \newlabel{sec:5.2@cref}{{[subsection][2][5]5.2}{[1][19][]19}{}{}{}}
+\citation{SedighMalekroodi:2025}
+\citation{SedighMalekroodi:2025}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Clinical Implications}{20}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:5.3}{{5.3}{20}{Clinical Implications}{subsection.5.3}{}}
+\newlabel{sec:5.3@cref}{{[subsection][3][5]5.3}{[1][20][]20}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Limitations and Future Work}{20}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:5.4}{{5.4}{20}{Limitations and Future Work}{subsection.5.4}{}}
+\newlabel{sec:5.4@cref}{{[subsection][4][5]5.4}{[1][20][]20}{}{}{}}
+\citation{Sun:2024}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{21}{section.6}\protected@file@percent }
+\newlabel{sec:6}{{6}{21}{Conclusion}{section.6}{}}
+\newlabel{sec:6@cref}{{[section][6][]6}{[1][21][]21}{}{}{}}
 \bibdata{paper}
 \bibcite{Kalia:2015}{{1}{2015}{{Kalia and Lang}}{{}}}
 \bibcite{GBD2016PDCollaborators:2018}{{2}{2018}{{GBD 2016 Parkinson's Disease Collaborators}}{{}}}
@@ -246,13 +260,10 @@
 \bibcite{Cao:2025}{{8}{2025}{{Cao et~al.}}{{Cao, Vogel, Gharahkhani, and Renteria}}}
 \bibcite{Yang:2020}{{9}{2020}{{Yang et~al.}}{{Yang, Wang, Yang, Xu, Luo, Chen, Feng, and Zou}}}
 \bibcite{Amato:2023}{{10}{2023}{{Amato et~al.}}{{Amato, Saggio, Cesarini, Olmo, and Costantini}}}
+\def\@LN@column{1}
+\@writefile{toc}{\contentsline {section}{\numberline {7}}{22}{section.7}\protected@file@percent }
 \bibcite{Shukla:2024}{{11}{2025}{{Shukla}}{{}}}
 \bibcite{Gunduz:2025}{{12}{2025}{{Gunduz}}{{}}}
-\def\@LN@column{1}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion}{20}{section.6}\protected@file@percent }
-\newlabel{sec:6}{{6}{20}{Conclusion}{section.6}{}}
-\newlabel{sec:6@cref}{{[section][6][]6}{[1][20][]20}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {7}}{20}{section.7}\protected@file@percent }
 \bibcite{Kuntalp:2024}{{13}{2024}{{Kuntalp et~al.}}{{Kuntalp, {\"O}zcan, D{\"u}zyel, Kababulut, and Kuntalp}}}
 \bibcite{Sun:2024}{{14}{2024}{{Sun et~al.}}{{Sun, Wang, Liang, Hao, and Shi}}}
 \bibcite{Rusz:2024}{{15}{2024}{{Rusz et~al.}}{{Rusz, Krack, and Tripoliti}}}
@@ -272,16 +283,17 @@
 \bibcite{Zhang:2025}{{29}{2025}{{Zhang et~al.}}{{Zhang, Sheng, Zhou, Zhang, Wang, and Zhang}}}
 \bibcite{Ding:2025}{{30}{2025}{{Ding et~al.}}{{Ding, Du, Wang, and Xiao}}}
 \bibcite{Panagiotopoulos:2023}{{31}{2023}{{Panagiotopoulos et~al.}}{{Panagiotopoulos, Korfiati, Theofilatos, Hurwitz, Deriu, and Mavroudi}}}
+\def\@LN@column{1}
 \bibcite{Priyadarshini:2023}{{32}{2023}{{Priyadarshini et~al.}}{{Priyadarshini, Premalatha, {\v {C}}ep, Jayasudha, and Kalita}}}
 \bibcite{Mishra:2025}{{33}{2025}{{Mishra et~al.}}{{Mishra, Pooja, Tripathi, and Rathore}}}
-\def\@LN@column{1}
 \bibcite{Palmal:2023}{{34}{2023}{{Palmal et~al.}}{{Palmal, Saha, and Tripathy}}}
 \bibcite{Mirjalili:2013}{{35}{2013}{{Mirjalili and Lewis}}{{}}}
 \bibcite{Brodersen:2010}{{36}{2010}{{Brodersen et~al.}}{{Brodersen, Ong, Stephan, and Buhmann}}}
 \bibcite{Priyadharshini:2024}{{37}{2024}{{Priyadharshini et~al.}}{{Priyadharshini, Ramkumar, Vairavasundaram, Narasimhan, Venkatesh, Madhavasarma, and Kotecha}}}
 \bibcite{Cheng:2015}{{38}{2015}{{Cheng and Jin}}{{}}}
+\bibcite{SedighMalekroodi:2025}{{39}{2025}{{{Sedigh Malekroodi} et~al.}}{{{Sedigh Malekroodi}, Lee, and Yi}}}
 \def\@LN@column{1}
-\newlabel{LastPage}{{6}{22}{Conclusion}{page.22}{}}
-\gdef\lastpage@lastpage{22}
-\gdef\lastpage@lastpageHy{22}
-\gdef \@abspage@last{22}
+\newlabel{LastPage}{{6}{24}{Conclusion}{page.24}{}}
+\gdef\lastpage@lastpage{24}
+\gdef\lastpage@lastpageHy{24}
+\gdef \@abspage@last{24}
