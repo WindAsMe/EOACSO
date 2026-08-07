@@ -10,7 +10,7 @@
 % Every entry below was extracted directly from the source (PDF read in
 % full, publisher page, or DOI resolver) -- not guessed from memory.
 % note/doi fields have been stripped at your request; see the two
-% standalone comment blocks below (Kalia:2015, Little:2008) for citation
+% standalone comment blocks below (Kalia:2015, Little:2007) for citation
 % details worth keeping even without a note field.
 % ============================================================
 
@@ -79,7 +79,9 @@
 }
 
 % --------------------------------------------------------------------
-% Little:2008: CITATION AMBIGUITY -- READ BEFORE USING
+% Little:2007 (key corrected from Little:2008 -- the year field was always
+% 2007 and independently verified correct; only the BibTeX key was wrong):
+% CITATION AMBIGUITY -- READ BEFORE USING
 % --------------------------------------------------------------------
 % This project's Oxford dataset (195 recordings / 31 subjects / 22
 % features, UCI ID 174) is conventionally cited as:
@@ -103,7 +105,7 @@
 % a flag to double check, not a settled fact. Use the entry below unless
 % your own check of the UCI page / BioMed Eng OnLine paper says otherwise.
 % --------------------------------------------------------------------
-@article{Little:2008,
+@article{Little:2007,
   author  = {Little, Max A. and McSharry, Patrick E. and Roberts, Stephen J. and Costello, Declan A. E. and Moroz, Irene M.},
   title   = {Exploiting Nonlinear Recurrence and Fractal Scaling Properties for Voice Disorder Detection},
   journal = {BioMedical Engineering OnLine},
@@ -174,7 +176,7 @@
 }
 
 @article{Ho:1999,
-  author  = {Ho, Aileen K. and Iansek, Robert and Marigliani, Cyrus and Bradshaw, John L. and Gates, Sandra},
+  author  = {Ho, Aileen K. and Iansek, Robert and Marigliani, Caterina and Bradshaw, John L. and Gates, Sandra},
   title   = {Speech impairment in a large sample of patients with {P}arkinson's disease},
   journal = {Behavioural Neurology},
   year    = {1999},
@@ -221,7 +223,7 @@
 }
 
 @article{Cao:2025,
-  author  = {Cao, Fangzhou and Vogel, Adam P. and Gharahkhani, Puya and Renteria, Miguel E.},
+  author  = {Cao, Fangyuan and Vogel, Adam P. and Gharahkhani, Puya and Renteria, Miguel E.},
   title   = {Speech and language biomarkers for {P}arkinson's disease prediction, early diagnosis and progression},
   journal = {npj Parkinson's Disease},
   year    = {2025},
@@ -302,19 +304,10 @@
 }
 
 % ============================================================
-% Classic method references for Methods (Section 3): the candidate
-% classifiers, the probability-calibration and evaluation-metric choices,
-% and the statistical-testing methodology. All verified against the
-% publisher page / JMLR / DOI resolver, not taken from memory.
+% Classic method references for Methods (Section 3): the
+% probability-calibration and evaluation-metric choices. All verified
+% against the publisher page / JMLR / DOI resolver, not taken from memory.
 % ============================================================
-
-@inproceedings{Chen:2016,
-  author    = {Chen, Tianqi and Guestrin, Carlos},
-  title     = {{XGB}oost: A Scalable Tree Boosting System},
-  booktitle = {Proceedings of the 22nd ACM SIGKDD International Conference on Knowledge Discovery and Data Mining},
-  year      = {2016},
-  pages     = {785--794}
-}
 
 @article{Zhang:2025,
   author  = {Zhang, Qian and Sheng, Jinhua and Zhou, Rougang and Zhang, Qiao and Wang, Binbing and Zhang, Rong},
@@ -393,11 +386,15 @@
   pages   = {1--14}
 }
 
+% Shukla:2024 -- YEAR CORRECTED: Crossref (DOI 10.1007/s41060-024-00513-0) shows
+% published-online 2024-03-08 but published-print 2025-08; volume 20/issue 2/pp.
+% 1051-1072 belong to the 2025 print issue, so year is set to match that issue
+% rather than the online-first date.
 @article{Shukla:2024,
   author  = {Shukla, Alok Kumar},
   title   = {Simultaneously feature selection and parameters optimization by teaching--learning and genetic algorithms for diagnosis of breast cancer},
   journal = {International Journal of Data Science and Analytics},
-  year    = {2024},
+  year    = {2025},
   volume  = {20},
   number  = {2},
   pages   = {1051--1072}
@@ -426,43 +423,5 @@
   booktitle = {Proceedings of the 20th International Conference on Pattern Recognition (ICPR)},
   year      = {2010},
   pages     = {3121--3124}
-}
-
-@article{Demsar:2006,
-  author  = {Dem{\v{s}}ar, Janez},
-  title   = {Statistical Comparisons of Classifiers over Multiple Data Sets},
-  journal = {Journal of Machine Learning Research},
-  year    = {2006},
-  volume  = {7},
-  pages   = {1--30}
-}
-
-@article{Wilcoxon:1945,
-  author  = {Wilcoxon, Frank},
-  title   = {Individual Comparisons by Ranking Methods},
-  journal = {Biometrics Bulletin},
-  year    = {1945},
-  volume  = {1},
-  number  = {6},
-  pages   = {80--83}
-}
-
-@article{Friedman:1937,
-  author  = {Friedman, Milton},
-  title   = {The Use of Ranks to Avoid the Assumption of Normality Implicit in the Analysis of Variance},
-  journal = {Journal of the American Statistical Association},
-  year    = {1937},
-  volume  = {32},
-  number  = {200},
-  pages   = {675--701}
-}
-
-@article{Pedregosa:2011,
-  author  = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and Vanderplas, Jake and Passos, Alexandre and Cournapeau, David and Brucher, Matthieu and Perrot, Matthieu and Duchesnay, {\'E}douard},
-  title   = {Scikit-learn: Machine Learning in {P}ython},
-  journal = {Journal of Machine Learning Research},
-  year    = {2011},
-  volume  = {12},
-  pages   = {2825--2830}
 }
 

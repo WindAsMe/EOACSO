@@ -1,0 +1,80 @@
+%  LaTeX support: latex@mdpi.com
+%  For support, please attach all files needed for compiling as well as the log file, and specify your operating system, LaTeX version, and LaTeX editor.
+
+%=================================================================
+\documentclass[journal,article,submit,pdftex,moreauthors]{Definitions/mdpi}
+
+
+\firstpage{1}
+\makeatletter
+\setcounter{page}{\@firstpage}
+\makeatother
+\pubvolume{1}
+\issuenum{1}
+\articlenumber{0}
+\pubyear{2023}
+\copyrightyear{2023}
+
+\usepackage{algorithm}
+\usepackage{algorithmic}
+\usepackage{rotating}
+\usepackage{bm}
+\usepackage{placeins}
+
+\datereceived{ }
+\daterevised{ } % Comment out if no revised date
+\dateaccepted{ }
+\datepublished{ }
+
+\hreflink{https://doi.org/} % If needed use \linebreak
+
+\Title{Toward Interpretable Voice-Based Parkinson's Disease Screening via Joint Transfer Function-Feature-Classifier Optimization}
+
+% MDPI internal command: Title for citation in the left column
+\TitleCitation{Toward Interpretable Voice-Based Parkinson's Disease Screening via Joint Transfer Function-Feature-Classifier Optimization}
+
+% Author Orchid ID: enter ID or remove command
+\newcommand{\orcidauthorA}{0000-0003-4605-5579}
+\newcommand{\orcidauthorB}{0000-0002-5750-9217}
+
+% Authors, for the paper (add full first names)
+\Author{Rui Zhong $^{1, *}$\orcidA{} and Masaharu Munetomo $^{2}$\orcidB{}}
+
+\AuthorNames{Rui Zhong, and Masaharu Munetomo}
+
+\AuthorCitation{Rui, Z.Masaharu, M.}
+
+\address{%
+$^{1}$ \quad Information Initiative Center, Hokkaido University; zhongrui@iic.hokudai.ac.jp \\
+$^{5}$ \quad Information Initiative Center, Hokkaido University; munetomo@iic.hokudai.ac.jp }
+
+% Contact information of the corresponding author
+\corres{Correspondence: zhongrui@iic.hokudai.ac.jp}
+
+
+\abstract{}
+
+% Keywords
+\keyword{}
+
+\begin{document}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/discussion}
+\input{sections/conclusion}
+
+\authorcontributions{}
+
+\funding{This research was supported by Shanghai Three-Year Action Plan for Inheritance, Innovation, and Development of Traditional Chinese Medicine (2025-2027) – National Medical Center (TCM Category) Construction Project ZY(2025-2027)-1-1-1}
+
+\institutionalreview{Not applicable}
+
+\informedconsent{Not applicable}
+
+\dataavailability{The datasets analyzed in this study are publicly available in the UCI Machine Learning Repository: the Oxford Parkinson's Disease Voice Dataset at \url{https://archive.ics.uci.edu/dataset/174/parkinsons}, and the Naranjo Replicated Acoustic Features Dataset at \url{https://archive.ics.uci.edu/dataset/489/parkinson+dataset+with+replicated+acoustic+features}. No new data were collected for this study.}
+
+\bibliography{paper}
+\end{document}

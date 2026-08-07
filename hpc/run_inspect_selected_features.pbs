@@ -1,0 +1,27 @@
+#!/bin/bash
+#PBS -N cso-inspect-features
+#PBS -q sc
+#PBS -l select=1:nsockets=1
+#PBS -l walltime=12:00:00
+#PBS -W group_list=c30636
+#PBS -j oe
+
+# One-off reproduction of CSO_searched_tf's single best-recorded run per
+# dataset (oxford seed=2476, naranjo seed=2776 -- see
+# src/experiments/inspect_selected_features.py's module docstring for how
+# these were picked), just to recover which named acoustic features its best
+# solution selects. Only 2 (dataset, seed) runs total, run in parallel via
+# ProcessPoolExecutor -- not a sweep, no --resume needed. Same per-run cost
+# as any other (algorithm, dataset, run) triple under multi_hot
+# classifier_encoding (1.7-5.8h observed elsewhere in this project, see
+# hpc/README.md), so walltime is set well above that worst case for 1 run
+# even though both run concurrently.
+
+set -euo pipefail
+
+cd "$PBS_O_WORKDIR"
+mkdir -p logs results/tables
+
+source "$HOME/miniconda3/bin/activate" eoacso
+
+python -m src.experiments.inspect_selected_features

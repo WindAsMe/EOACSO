@@ -26,7 +26,6 @@ a transfer function nor a fitness formula for the search loop. We therefore:
 import numpy as np
 
 from .base import BOUND, clamp, dimension, generation_schedule
-from .bwoa import run_bwoa
 from .result import OptimizationResult
 from .transfer import binarize_and_eval
 
@@ -112,24 +111,76 @@ def run_hybrid_gwo(
 ):
     """Sec. 3.3 of Al-Najjar et al.: WOA's best solution seeds the GWO population.
     `max_evaluations`, if given, is split evenly between the WOA stage and
-    the GWO stage (each stage gets its own half of the budget)."""
-    stage_budget = None if max_evaluations is None else max_evaluations / 2.0
-    woa_result = run_bwoa(
-        evaluator,
-        n_features,
-        pop_size=pop_size,
-        n_generations=n_gen_woa,
-        seed=seed,
-        binarize_mode="stochastic",
-        max_evaluations=stage_budget,
-        classifier_encoding=classifier_encoding,
-    )
-
-    rng = np.random.default_rng(seed + 1)
+    the GWO stage (each stage gets its own half of the budget). The WOA
+    stage's update equations (encircling/bubble-net/search-for-prey, the
+    canonical Mirjalili & Lewis 2016 formulas) are inlined below rather than
+    calling out to a separately-registered WOA baseline, since Al-Najjar et
+    al.'s own cascade design (Fig. 1a) treats WOA->GWO as a single algorithm,
+    not a composition of two independently-reproduced ones."""
     D = dimension(n_features)
+    stage_budget = None if max_evaluations is None else max_evaluations / 2.0
+
+    # --- Stage 1: WOA (encircling / bubble-net / search-for-prey) ---
+    woa_rng = np.random.default_rng(seed)
+    woa_b = 1.0  # spiral shape constant
+
+    woa_positions = woa_rng.uniform(-BOUND, BOUND, size=(pop_size, D))
+    woa_bits = np.zeros((pop_size, D), dtype=bool)
+    woa_fitness = np.empty(pop_size)
+    woa_infos = [None] * pop_size
+
+    for i in range(pop_size):
+        woa_bits[i], woa_fitness[i], woa_infos[i] = binarize_and_eval(
+            woa_positions[i], woa_bits[i], woa_rng, evaluator, n_features,
+            mode="stochastic", classifier_encoding=classifier_encoding,
+        )
+
+    woa_gbest_idx = int(np.argmin(woa_fitness))
+    woa_gbest_pos = woa_positions[woa_gbest_idx].copy()
+    woa_gbest_fit = float(woa_fitness[woa_gbest_idx])
+    woa_gbest_info = woa_infos[woa_gbest_idx]
+    woa_history = [(evaluator.n_evaluations, woa_gbest_fit)]
+
+    for gen, t_frac in generation_schedule(n_gen_woa, stage_budget, evaluator):
+        a = 2.0 - 2.0 * t_frac
+        for i in range(pop_size):
+            r1, r2 = woa_rng.random(D), woa_rng.random(D)
+            A = 2 * a * r1 - a
+            C = 2 * r2
+
+            if woa_rng.random() < 0.5:
+                encircle_mask = np.abs(A) < 1
+                d_best = np.abs(C * woa_gbest_pos - woa_positions[i])
+                candidate_encircle = woa_gbest_pos - A * d_best
+
+                j = woa_rng.integers(pop_size)
+                d_rand = np.abs(C * woa_positions[j] - woa_positions[i])
+                candidate_search = woa_positions[j] - A * d_rand
+
+                new_pos = np.where(encircle_mask, candidate_encircle, candidate_search)
+            else:
+                l = woa_rng.uniform(-1, 1, size=D)
+                d_best = np.abs(woa_gbest_pos - woa_positions[i])
+                new_pos = d_best * np.exp(woa_b * l) * np.cos(2 * np.pi * l) + woa_gbest_pos
+
+            woa_positions[i] = clamp(new_pos)
+            woa_bits[i], woa_fitness[i], woa_infos[i] = binarize_and_eval(
+                woa_positions[i], woa_bits[i], woa_rng, evaluator, n_features,
+                mode="stochastic", classifier_encoding=classifier_encoding,
+            )
+
+        gen_best = int(np.argmin(woa_fitness))
+        if woa_fitness[gen_best] < woa_gbest_fit - 1e-9:
+            woa_gbest_fit = float(woa_fitness[gen_best])
+            woa_gbest_pos = woa_positions[gen_best].copy()
+            woa_gbest_info = woa_infos[gen_best]
+        woa_history.append((evaluator.n_evaluations, woa_gbest_fit))
+
+    # --- Stage 2: GWO, seeded from the WOA stage's best solution ---
+    rng = np.random.default_rng(seed + 1)
 
     positions = rng.uniform(-BOUND, BOUND, size=(pop_size, D))
-    positions[0] = woa_result.best_position.copy()
+    positions[0] = woa_gbest_pos.copy()
     bits = np.zeros((pop_size, D), dtype=bool)
     fitness = np.empty(pop_size)
     infos = [None] * pop_size
@@ -144,9 +195,9 @@ def run_hybrid_gwo(
     gbest_pos = positions[gbest_idx].copy()
     gbest_fit = float(fitness[gbest_idx])
     gbest_info = infos[gbest_idx]
-    if woa_result.best_fitness < gbest_fit:
-        gbest_fit, gbest_pos, gbest_info = woa_result.best_fitness, woa_result.best_position.copy(), woa_result.best_info
-    history = list(woa_result.history) + [(evaluator.n_evaluations, gbest_fit)]
+    if woa_gbest_fit < gbest_fit:
+        gbest_fit, gbest_pos, gbest_info = woa_gbest_fit, woa_gbest_pos.copy(), woa_gbest_info
+    history = list(woa_history) + [(evaluator.n_evaluations, gbest_fit)]
 
     # `evaluator.n_evaluations` is cumulative across both stages, so stage 2's
     # target is the FULL budget (not stage_budget again), letting it consume

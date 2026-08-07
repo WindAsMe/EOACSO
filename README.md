@@ -94,15 +94,14 @@ documented in the corresponding source file's docstring.
 |---|---|---|---|
 | BPSO | `bpso.py` | Hashemi et al. 2026 | PSO update eq. not in paper -> textbook PSO |
 | BBOA | `bboa.py` | Hashemi et al. 2026 | BOA fragrance/movement eq. not in paper -> canonical BOA (Arora & Singh 2019) |
-| BWOA | `bwoa.py` | Hashemi et al. 2026 | WOA eq. not in paper -> canonical WOA (Mirjalili & Lewis 2016) |
-| BGWO / HybridGWO | `gwo.py` | Al-Najjar et al. 2024 | "Hybrid GWO" (Al-Tashi et al. 2019) not available -> canonical GWO used as the refine stage; no transfer fn stated -> default stochastic S-shaped |
+| BGWO / HybridGWO | `gwo.py` | Al-Najjar et al. 2024 | "Hybrid GWO" (Al-Tashi et al. 2019) not available -> canonical GWO used as the refine stage; no transfer fn stated -> default stochastic S-shaped; HybridGWO's WOA stage (canonical WOA, Mirjalili & Lewis 2016) is inlined, not a separately registered baseline |
 | MGWO-eP | `mgwo_ep.py` | Santhosh et al. 2025 | fully specified (Eq. 12-14); no transfer fn stated -> threshold at 0.5, positions kept in [0,1] as the paper does |
 | mHGS | `mhgs.py` | Hashim et al. 2023 | fully specified (Eq. 19-24); population size / iteration count not stated -> project defaults |
 | QMFO | `qmfo.py` | Mansour 2024 | Mayfly eq. fully specified; the "quantum rotation gate" has no formula linking it to position updates -> approximated as a QEA-style rotation nudge toward the global best's bits |
 
-All 8 (BPSO/BBOA/BWOA/BGWO/HybridGWO/MGWO-eP/mHGS/QMFO), plus the 2 CSO
-variants (`CSO_searched_tf`, `CSO_fixed_tf`), are registered in
-`src/experiments/run_fs_experiment.py::ALGORITHMS`.
+All 8 (mHGS/BGWO/HybridGWO/QMFO/MGWO-eP/BPSO/BBOA/CSO_searched_tf) are
+registered in `src/experiments/run_fs_experiment.py::ALGORITHMS`, in that
+canonical order (used consistently in this project's tables and figures).
 
 ## Running experiments
 
@@ -138,7 +137,7 @@ src/
     transfer.py                S-shaped / V-shaped / hybrid / threshold binarization,
                                  + TF_CANDIDATES/decode_and_binarize_searched_tf
     cso.py                      plain CSO (CSO_searched_tf / CSO_fixed_tf via fixed_tf_index)
-    bpso.py bboa.py bwoa.py     Hashemi et al. 2026 baselines
+    bpso.py bboa.py              Hashemi et al. 2026 baselines
     gwo.py                      BGWO + WOA->HybridGWO cascade (Al-Najjar et al. 2024)
     mgwo_ep.py                  Santhosh et al. 2025
     mhgs.py                     Hashim et al. 2023

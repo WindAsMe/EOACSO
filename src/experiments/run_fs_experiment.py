@@ -1,5 +1,5 @@
 """Run every optimizer available in this project -- the proposed method
-(plain CSO with a per-particle searched transfer function) and the 8
+(plain CSO with a per-particle searched transfer function) and the 7
 reproduced literature baselines -- for `n_runs` independent seeds on a chosen
 dataset, saving per-run results to CSV.
 
@@ -9,8 +9,8 @@ since each is fully independent -- see `_run_single` / `run_algorithm`.
 Every algorithm is compared under an equal fitness-evaluation budget
 (`max_evaluations`), not equal generation count -- generation count isn't a
 fair unit since algorithms spend very different numbers of evaluations per
-generation (CSO only re-evaluates losers each generation; BPSO/BBOA/
-BWOA's hybrid S/V transfer function evaluates two binarization candidates
+generation (CSO only re-evaluates losers each generation; BPSO/BBOA's
+hybrid S/V transfer function evaluates two binarization candidates
 per individual; mHGS's production/escaping operators each conditionally
 add extra evaluations). See `src/optimizers/base.py::generation_schedule`
 for how `max_evaluations` becomes the actual stopping condition while a
@@ -25,11 +25,18 @@ in advance (see `src/optimizers/cso.py`).
 
 Reproduced baselines (see src/optimizers/*.py docstrings for exact sources
 and which equations are paper-faithful vs. a documented gap-fill):
-  BPSO, BBOA, BWOA   - Hashemi et al. (2026)
+  BPSO, BBOA         - Hashemi et al. (2026)
   BGWO, HybridGWO    - Al-Najjar et al. (2024) WOA->Hybrid-GWO cascade
+    (HybridGWO's WOA stage is inlined in gwo.py, not a separately
+    registered baseline)
   MGWO-eP            - Santhosh et al. (2025)
   mHGS               - Hashim et al. (2023)
   QMFO               - Mansour (2024)
+
+`ALGORITHMS` below is ordered mHGS, BGWO, HybridGWO, QMFO, MGWO-eP, BPSO,
+BBOA, CSO_searched_tf -- the canonical order for this project's tables and
+figures; anything iterating over `ALGORITHMS`/`BASELINE_ALGORITHMS`
+inherits this order for free.
 """
 
 import argparse
@@ -48,7 +55,6 @@ from src.optimizers import (
     run_bboa,
     run_bgwo,
     run_bpso,
-    run_bwoa,
     run_cso,
     run_hybrid_gwo,
     run_mgwo_ep,
@@ -88,14 +94,13 @@ RECORD_FIELDS = [
 # early if it is, e.g. mHGS's operators fire conditionally so its per-gen
 # cost is only an expectation, not exact).
 _EVALS_PER_GENERATION = {
-    "BPSO": lambda pop: 2 * pop,  # hybrid S/V transfer evaluates both candidates
-    "BBOA": lambda pop: 2 * pop,
-    "BWOA": lambda pop: 2 * pop,
+    "mHGS": lambda pop: 2.6 * pop,  # mPO (~60%) + mLEO (100%) + coop. comm. (100%)
     "BGWO": lambda pop: pop,
     "HybridGWO": lambda pop: pop,  # per stage; two stages share the total budget
-    "MGWO-eP": lambda pop: pop,
-    "mHGS": lambda pop: 2.6 * pop,  # mPO (~60%) + mLEO (100%) + coop. comm. (100%)
     "QMFO": lambda pop: 2 * pop + 2,
+    "MGWO-eP": lambda pop: pop,
+    "BPSO": lambda pop: 2 * pop,  # hybrid S/V transfer evaluates both candidates
+    "BBOA": lambda pop: 2 * pop,
 }
 
 
@@ -122,7 +127,17 @@ def _run_hybrid_gwo_adapter(evaluator, n_features, pop_size, n_generations, seed
 
 
 ALGORITHMS = {
-    "CSO_searched_tf": lambda ev, nf, p, g, s, me, ce: run_cso(
+    "mHGS": lambda ev, nf, p, g, s, me, ce: run_mhgs(
+        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
+    ),
+    "BGWO": lambda ev, nf, p, g, s, me, ce: run_bgwo(
+        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
+    ),
+    "HybridGWO": _run_hybrid_gwo_adapter,
+    "QMFO": lambda ev, nf, p, g, s, me, ce: run_qmfo(
+        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
+    ),
+    "MGWO-eP": lambda ev, nf, p, g, s, me, ce: run_mgwo_ep(
         ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
     ),
     "BPSO": lambda ev, nf, p, g, s, me, ce: run_bpso(
@@ -131,20 +146,7 @@ ALGORITHMS = {
     "BBOA": lambda ev, nf, p, g, s, me, ce: run_bboa(
         ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
     ),
-    "BWOA": lambda ev, nf, p, g, s, me, ce: run_bwoa(
-        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
-    ),
-    "BGWO": lambda ev, nf, p, g, s, me, ce: run_bgwo(
-        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
-    ),
-    "HybridGWO": _run_hybrid_gwo_adapter,
-    "MGWO-eP": lambda ev, nf, p, g, s, me, ce: run_mgwo_ep(
-        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
-    ),
-    "mHGS": lambda ev, nf, p, g, s, me, ce: run_mhgs(
-        ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
-    ),
-    "QMFO": lambda ev, nf, p, g, s, me, ce: run_qmfo(
+    "CSO_searched_tf": lambda ev, nf, p, g, s, me, ce: run_cso(
         ev, nf, pop_size=p, n_generations=g, seed=s, max_evaluations=me, classifier_encoding=ce
     ),
 }

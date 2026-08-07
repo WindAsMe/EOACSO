@@ -106,6 +106,17 @@ separately:
 qsub hpc/run_phi_sensitivity.pbs
 ```
 
+To recover which *named* acoustic features CSO_searched_tf's best-recorded
+run selects per dataset (for the paper's feature-interpretability
+discussion -- the comparison/phi-sensitivity CSVs above only log the feature
+*count*, not which features), a separate one-off, 2-run job reproduces the
+best already-observed (dataset, seed) pair from `*_comparison_results.csv`:
+```bash
+qsub hpc/run_inspect_selected_features.pbs
+```
+Writes `results/tables/selected_features.csv`. Only 2 runs total (oxford +
+naranjo, in parallel), so this needs one submission, not several.
+
 **On walltime and token budget:** this cluster's prepaid queues
 (`ec`/`sc`/`lc`) pre-check token budget assuming the job runs for its
 *entire requested* walltime, and reject submission outright ("Token limit

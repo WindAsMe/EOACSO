@@ -1,7 +1,6 @@
 from .base import CLASSIFIER_NAMES, decode_particle, dimension, sigmoid, stochastic_binarize
 from .bboa import run_bboa
 from .bpso import run_bpso
-from .bwoa import run_bwoa
 from .cso import run_cso
 from .gwo import run_bgwo, run_hybrid_gwo
 from .mgwo_ep import run_mgwo_ep
@@ -17,7 +16,6 @@ __all__ = [
     "run_bboa",
     "run_bgwo",
     "run_bpso",
-    "run_bwoa",
     "run_cso",
     "run_hybrid_gwo",
     "run_mgwo_ep",
